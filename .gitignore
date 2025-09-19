@@ -1,0 +1,83 @@
+# Ignorar dependencias y builds (Vite / React / Node)
+node_modules/
+dist/
+build/
+.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.tsbuildinfo
+.eslintcache
+/.cache
+
+# Variables de entorno locales (no subir secretos)
+.env
+.env.*
+.env.local
+.env.development.local
+.env.production.local
+
+# Archivos de logs y temporales
+*.log
+*.tmp
+*.temp
+*~
+
+# Cobertura y pruebas
+coverage/
+.nyc_output/
+jest-*.json
+.vitest/
+
+# Ignorar artefactos de empaquetado de Node/Python
+package-lock.json.lockfile? # dejar solo si realmente quieres
+# (no ignorar yarn.lock ni package-lock.json si los usas para determinismo)
+
+# Ignorar entornos virtuales y artefactos de Python (FastAPI)
+# bytecode y caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# entornos virtuales comunes
+venv/
+env/
+.venv/
+ENV/
+pipenv/
+Pipfile.lock
+
+# empaquetado y metadatos de Python
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# pytest / mypy / cobertura
+.pytest_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Bases de datos locales
+*.sqlite3
+*.db
+
+# Editores / IDEs
+.vscode/
+.idea/
+*.iml
+*.sublime-workspace
+*.sublime-project
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Archivos temporales del editor
+*.swp
+*.swo
+*.bak

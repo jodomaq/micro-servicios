@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Micro-Servicios | Soluciones Tecnológicas Innovadoras</title>
+    <meta name="description" content="Descubre nuestros microservicios digitales: Tests de IQ, IA para fotografías, generadores QR, horóscopo y mucho más. Soluciones tecnológicas innovadoras.">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <img src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=40&h=40&fit=crop&crop=center" alt="Logo" class="logo-img">
+                    <span class="logo-text">MICRO-SERVICIOS</span>
+                </div>
+                
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#inicio" class="nav-link">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#servicios" class="nav-link">Servicios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#caracteristicas" class="nav-link">Características</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#contacto" class="nav-link">Contacto</a>
+                    </li>
+                </ul>
+                
+                <div class="nav-toggle">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="inicio" class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        Somos <span class="highlight">Innovadores</span><br>
+                        Soluciones Tecnológicas
+                    </h1>
+                    <p class="hero-description">
+                        Descubre nuestra amplia gama de microservicios digitales diseñados para potenciar tu negocio y simplificar tu vida digital. Desde tests de inteligencia hasta herramientas de IA avanzadas.
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="#servicios" class="btn btn-primary">Explorar Servicios</a>
+                        <a href="#contacto" class="btn btn-secondary">Contactar Ahora</a>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <i class="fas fa-users"></i>
+                            <span class="stat-number">10K+</span>
+                            <span class="stat-label">Usuarios Activos</span>
+                        </div>
+                        <div class="stat">
+                            <i class="fas fa-shield-alt"></i>
+                            <span class="stat-number">99.9%</span>
+                            <span class="stat-label">Tiempo de Actividad</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="https://images.unsplash.com/photo-1551434678-e076c223a692?w=600&h=400&fit=crop&crop=center" alt="Tecnología Innovadora">
+                    <div class="floating-card card-1">
+                        <i class="fas fa-brain"></i>
+                        <span>IA Avanzada</span>
+                    </div>
+                    <div class="floating-card card-2">
+                        <i class="fas fa-qrcode"></i>
+                        <span>QR Generator</span>
+                    </div>
+                    <div class="floating-card card-3">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Analytics</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="servicios" class="services">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Nuestros Servicios</h2>
+                <p class="section-description">
+                    Explora nuestra innovadora colección de microservicios digitales diseñados para satisfacer todas tus necesidades tecnológicas
+                </p>
+            </div>
+            
+            <div class="services-grid">
+                <!-- IQ Test -->
+                <div class="service-card" data-service="IQTest">
+                    <div class="service-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3 class="service-title">Test de IQ</h3>
+                    <p class="service-description">
+                        Mide tu coeficiente intelectual con nuestro test científicamente validado. Obtén resultados precisos y detallados sobre tus habilidades cognitivas.
+                    </p>
+                    <div class="service-features">
+                        <span class="feature">✓ Científicamente validado</span>
+                        <span class="feature">✓ Resultados instantáneos</span>
+                        <span class="feature">✓ Análisis detallado</span>
+                    </div>
+                    <a href="/IQTest" class="service-link">Realizar Test <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <!-- Excel Converter -->
+                <div class="service-card" data-service="ExcelConverter">
+                    <div class="service-icon">
+                        <i class="fas fa-file-excel"></i>
+                    </div>
+                    <h3 class="service-title">Convertir Estados de Cuenta</h3>
+                    <p class="service-description">
+                        Convierte automáticamente tus estados de cuenta bancarios a formato Excel. Organiza tus finanzas de manera eficiente y profesional.
+                    </p>
+                    <div class="service-features">
+                        <span class="feature">✓ Conversión automática</span>
+                        <span class="feature">✓ Múltiples bancos</span>
+                        <span class="feature">✓ Formato profesional</span>
+                    </div>
+                    <a href="/ExcelConverter" class="service-link">Convertir Ahora <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <!-- Medical History AI -->
+                <div class="service-card" data-service="MedicalHistoryAI">
+                    <div class="service-icon">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <h3 class="service-title">Historia Clínica con IA</h3>
+                    <p class="service-description">
+                        Gestiona historiales médicos de forma inteligente con IA. Análisis automático de síntomas y recomendaciones personalizadas.
+                    </p>
+                    <div class="service-features">
+                        <span class="feature">✓ IA médica avanzada</span>
+                        <span class="feature">✓ Diagnóstico asistido</span>
+                        <span class="feature">✓ Historial completo</span>
+                    </div>
+                    <a href="/MedicalHistoryAI" class="service-link">Acceder <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <!-- Photo Restoration -->
+                <div class="service-card" data-service="PhotoRestoration">
+                    <div class="service-icon">
+                        <i class="fas fa-images"></i>
+                    </div>
+                    <h3 class="service-title">Restauración de Fotos con IA</h3>
+                    <p class="service-description">
+                        Restaura fotografías antiguas y dañadas usando inteligencia artificial. Recupera memorias familiares con calidad profesional.
+                    </p>
+                    <div class="service-features">
+                        <span class="feature">✓ IA de restauración</span>
+                        <span class="feature">✓ Calidad HD</span>
+                        <span class="feature">✓ Colorización automática</span>
+                    </div>
+                    <a href="/PhotoRestoration" class="service-link">Restaurar Foto <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <!-- Friend Bets -->
+                <div class="service-card" data-service="FriendBets">
+                    <div class="service-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="service-title">Quinielas entre Amigos</h3>
+                    <p class="service-description">
+                        Crea competencias deportivas divertidas con tus amigos. Sistema de puntuación automático y rankings en tiempo real.
+                    </p>
+                    <div class="service-features">
+                        <span class="feature">✓ Grupos privados</span>
+                        <span class="feature">✓ Rankings automáticos</span>
+                        <span class="feature">✓ Múltiples deportes</span>
+                    </div>
+                    <a href="/FriendBets" class="service-link">Crear Quiniela <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <!-- Student Quiz -->
+                <div class="service-card" data-service="StudentQuiz">
+                    <div class="service-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="service-title">Cuestionarios para Estudiantes</h3>
+                    <p class="service-description">
+                        Herramienta educativa para crear exámenes interactivos. Perfecta para profesores que buscan evaluaciones dinámicas y efectivas.
+                    </p>
+                    <div class="service-features">
+                        <span class="feature">✓ Creación rápida</span>
+                        <span class="feature">✓ Calificación automática</span>
+                        <span class="feature">✓ Estadísticas detalladas</span>
+                    </div>
+                    <a href="/StudentQuiz" class="service-link">Crear Quiz <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <!-- QR Generator -->
+                <div class="service-card" data-service="QRGenerator">
+                    <div class="service-icon">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                    <h3 class="service-title">Generador de QR</h3>
+                    <p class="service-description">
+                        Genera códigos QR personalizados para cualquier propósito. URLs, textos, contactos y más con diseños atractivos y profesionales.
+                    </p>
+                    <div class="service-features">
+                        <span class="feature">✓ Múltiples formatos</span>
+                        <span class="feature">✓ Diseños personalizados</span>
+                        <span class="feature">✓ Alta resolución</span>
+                    </div>
+                    <a href="/QRGenerator" class="service-link">Generar QR <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <!-- Menu QR -->
+                <div class="service-card" data-service="MenuQR">
+                    <div class="service-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <h3 class="service-title">QR de Menú Digital</h3>
+                    <p class="service-description">
+                        Digitaliza el menú de tu restaurante con códigos QR. Sube tu menú y genera códigos QR profesionales para mesas.
+                    </p>
+                    <div class="service-features">
+                        <span class="feature">✓ Menús digitales</span>
+                        <span class="feature">✓ Actualización fácil</span>
+                        <span class="feature">✓ Sin contacto</span>
+                    </div>
+                    <a href="/MenuQR" class="service-link">Crear Menú <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <!-- Career Test -->
+                <div class="service-card" data-service="CareerTest">
+                    <div class="service-icon">
+                        <i class="fas fa-compass"></i>
+                    </div>
+                    <h3 class="service-title">Test de Orientación Vocacional</h3>
+                    <p class="service-description">
+                        Descubre tu carrera ideal con nuestro test vocacional científico. Identifica tus fortalezas y encuentra tu camino profesional.
+                    </p>
+                    <div class="service-features">
+                        <span class="feature">✓ Base científica</span>
+                        <span class="feature">✓ Recomendaciones personalizadas</span>
+                        <span class="feature">✓ Análisis completo</span>
+                    </div>
+                    <a href="/CareerTest" class="service-link">Tomar Test <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <!-- Horoscope -->
+                <div class="service-card" data-service="Horoscope">
+                    <div class="service-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3 class="service-title">Horóscopo</h3>
+                    <p class="service-description">
+                        Consulta tu horóscopo diario personalizado. Predicciones astrológicas detalladas para amor, trabajo y salud.
+                    </p>
+                    <div class="service-features">
+                        <span class="feature">✓ Predicciones diarias</span>
+                        <span class="feature">✓ 12 signos zodiacales</span>
+                        <span class="feature">✓ Análisis detallado</span>
+                    </div>
+                    <a href="/Horoscope" class="service-link">Ver Horóscopo <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <!-- URL Shortener -->
+                <div class="service-card" data-service="URLShortener">
+                    <div class="service-icon">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <h3 class="service-title">Acortador de Enlaces</h3>
+                    <p class="service-description">
+                        Acorta URLs largas y obtén estadísticas de clics. Perfecto para redes sociales y campañas de marketing digital.
+                    </p>
+                    <div class="service-features">
+                        <span class="feature">✓ Enlaces personalizados</span>
+                        <span class="feature">✓ Estadísticas de clics</span>
+                        <span class="feature">✓ API disponible</span>
+                    </div>
+                    <a href="/URLShortener" class="service-link">Acortar URL <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <!-- Future Teller -->
+                <div class="service-card" data-service="FutureTeller">
+                    <div class="service-icon">
+                        <i class="fas fa-crystal-ball"></i>
+                    </div>
+                    <h3 class="service-title">Te Digo Tu Futuro</h3>
+                    <p class="service-description">
+                        Predicciones personalizadas basadas en análisis de patrones. Una experiencia divertida y entretenida para conocer posibilidades futuras.
+                    </p>
+                    <div class="service-features">
+                        <span class="feature">✓ Predicciones personalizadas</span>
+                        <span class="feature">✓ Análisis de patrones</span>
+                        <span class="feature">✓ Entretenimiento único</span>
+                    </div>
+                    <a href="/FutureTeller" class="service-link">Conocer Futuro <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <!-- Image to PowerPoint -->
+                <div class="service-card" data-service="ImageToPPT">
+                    <div class="service-icon">
+                        <i class="fas fa-presentation"></i>
+                    </div>
+                    <h3 class="service-title">Imagen a Diagrama PowerPoint</h3>
+                    <p class="service-description">
+                        Convierte imágenes en diagramas editables de PowerPoint. Perfecto para crear presentaciones profesionales rápidamente.
+                    </p>
+                    <div class="service-features">
+                        <span class="feature">✓ Conversión automática</span>
+                        <span class="feature">✓ Diagramas editables</span>
+                        <span class="feature">✓ Formato profesional</span>
+                    </div>
+                    <a href="/ImageToPPT" class="service-link">Convertir Imagen <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="caracteristicas" class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">¿Por Qué Elegir Nuestros Servicios?</h2>
+                <p class="section-description">
+                    Ofrecemos soluciones tecnológicas de vanguardia con la más alta calidad y confiabilidad
+                </p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3>Tecnología Avanzada</h3>
+                    <p>Utilizamos las últimas tecnologías de IA y machine learning para ofrecer resultados precisos y confiables.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Seguridad Garantizada</h3>
+                    <p>Tus datos están protegidos con encriptación de nivel empresarial y protocolos de seguridad avanzados.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Disponibilidad 24/7</h3>
+                    <p>Nuestros servicios están disponibles las 24 horas del día, los 7 días de la semana con tiempo de actividad del 99.9%.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3>Soporte Especializado</h3>
+                    <p>Equipo de soporte técnico especializado listo para ayudarte en cualquier momento que lo necesites.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contacto" class="contact">
+        <div class="container">
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h2>¿Tienes un proyecto en mente? Pongámonos a trabajar.</h2>
+                    <p>Contáctanos para conocer más sobre nuestros servicios y cómo podemos ayudarte a alcanzar tus objetivos digitales.</p>
+                    
+                    <div class="contact-details">
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>contacto@micro-servicios.com.mx</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <span>+52 (55) 1234-5678</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Ciudad de México, México</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form">
+                    <form>
+                        <div class="form-group">
+                            <input type="text" placeholder="Tu Nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" placeholder="Tu Email" required>
+                        </div>
+                        <div class="form-group">
+                            <select>
+                                <option>Selecciona un Servicio</option>
+                                <option>Test de IQ</option>
+                                <option>Convertir Estados de Cuenta</option>
+                                <option>Historia Clínica con IA</option>
+                                <option>Restauración de Fotos</option>
+                                <option>Otros</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <textarea placeholder="Tu Mensaje" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enviar Mensaje</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <img src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=40&h=40&fit=crop&crop=center" alt="Logo">
+                        <span>MICRO-SERVICIOS</span>
+                    </div>
+                    <p>Una agencia de servicios digitales innovadora. Obten soluciones tecnológicas de expertos consultores.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Servicios Principales</h4>
+                    <ul>
+                        <li><a href="/IQTest">Test de IQ</a></li>
+                        <li><a href="/ExcelConverter">Convertir a Excel</a></li>
+                        <li><a href="/MedicalHistoryAI">Historia Clínica IA</a></li>
+                        <li><a href="/PhotoRestoration">Restaurar Fotos</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Herramientas</h4>
+                    <ul>
+                        <li><a href="/QRGenerator">Generador QR</a></li>
+                        <li><a href="/URLShortener">Acortador URL</a></li>
+                        <li><a href="/StudentQuiz">Quiz Estudiantes</a></li>
+                        <li><a href="/CareerTest">Test Vocacional</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Contacto</h4>
+                    <p>contacto@micro-servicios.com.mx</p>
+                    <p>+52 (55) 1234-5678</p>
+                    <p>Ciudad de México, México</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 Micro-Servicios.com.mx. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

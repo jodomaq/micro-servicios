@@ -1,0 +1,22 @@
+Crear una Landing Page, con estilos, usando colores, estilos y efectos parecidos a la siguiente página: https://techy-xi.vercel.app/?storefront=envato-elements 
+La página tiene el objetivo de mostrar algunos servicios web, los cuales deberan tener una tarjeta de acceso, así como también ser parte de los menús.
+Puedes usar html, javascript y css.
+El nombre de dominio es micro-servicios.com.mx
+Cada micro-servicio debe tener un enlace hacia una sub-carpeta. Por ejemplo para IQTest sería https://micro-servicios.com.mx/IQTest y la carpeta en el directorio raiz sería IQTest
+Genera descripciones para cada micro-servicio, la idea es venderlos.
+Agrega imágenes relacionadas desde catálogos de imagenes gratuitas en la web
+Escribe la página en español.
+Estos son los micro-servicios:
+1. IQTest
+2. Convertir estados de cuenta a Excel
+3. Historia clínica con IA
+4. Reparación de fotografías antiguas con IA
+5. Quinielas entra amigos
+6. Cuestionarios para alumnos en clase
+7. Generador de QR
+8. Generador de QR de menú, subir menú
+9. Test de orientación vocacional
+10. Horóscopo
+11. Acortador de enlace
+12. Te digo tu futuro
+13. De imagen a diagrama en powerpoint
