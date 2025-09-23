@@ -12,16 +12,22 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-app = FastAPI(title="Micro-Servicios Contact API")
+app = FastAPI(title="Micro-Servicios API")
 
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://micro-servicios.com.mx", "http://localhost:5173"],
+    allow_origins=["https://micro-servicios.com.mx", "http://localhost:5173", "http://localhost:5174"],
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+try:
+    from app.routes import router as converter_router
+    app.include_router(converter_router)
+except Exception as e:
+    logger.warning(f"Excel Converter routes not loaded: {e}")
 
 class ContactForm(BaseModel):
     from_name: str
