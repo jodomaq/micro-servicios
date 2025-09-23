@@ -1,0 +1,51 @@
+id,text,question_type,options,correct_answer,difficulty
+1,"¿Qué número sigue en la serie? 1, 4, 9, 16, ...",logical,20|25|30|36,25,1.3
+2,"Si todos los gatos son mamíferos y algunos mamíferos son carnívoros, entonces:",logical,Todos los gatos son carnívoros|Algunos gatos son carnívoros|Ningún gato es carnívoro|No se puede determinar,No se puede determinar,1.6
+3,"Si A=1, B=2, ..., Z=26, ¿cuánto vale la palabra LOGICA?",logical,45|50|55|60,45,1.9
+4,"Identifica el intruso: Rojo, Azul, Verde, Nube",logical,Rojo|Azul|Verde|Nube,Nube,1.0
+5,Completa la analogía: Llave es a Puerta como Contraseña es a...,logical,Internet|Cerradura|Acceso|Archivo,Acceso,1.3
+6,"¿Qué número sigue en la serie? 1, 4, 9, 16, ...",logical,20|25|30|36,25,1.6
+7,"Si todos los gatos son mamíferos y algunos mamíferos son carnívoros, entonces:",logical,Todos los gatos son carnívoros|Algunos gatos son carnívoros|Ningún gato es carnívoro|No se puede determinar,No se puede determinar,1.9
+8,"Si A=1, B=2, ..., Z=26, ¿cuánto vale la palabra LOGICA?",logical,45|50|55|60,45,1.0
+9,"Identifica el intruso: Rojo, Azul, Verde, Nube",logical,Rojo|Azul|Verde|Nube,Nube,1.3
+10,Completa la analogía: Llave es a Puerta como Contraseña es a...,logical,Internet|Cerradura|Acceso|Archivo,Acceso,1.6
+11,"¿Qué número sigue en la serie? 1, 4, 9, 16, ...",logical,20|25|30|36,25,1.9
+12,"Si todos los gatos son mamíferos y algunos mamíferos son carnívoros, entonces:",logical,Todos los gatos son carnívoros|Algunos gatos son carnívoros|Ningún gato es carnívoro|No se puede determinar,No se puede determinar,1.0
+13,"Si A=1, B=2, ..., Z=26, ¿cuánto vale la palabra LOGICA?",logical,45|50|55|60,45,1.3
+14,"Identifica el intruso: Rojo, Azul, Verde, Nube",logical,Rojo|Azul|Verde|Nube,Nube,1.6
+15,Completa la analogía: Llave es a Puerta como Contraseña es a...,logical,Internet|Cerradura|Acceso|Archivo,Acceso,1.9
+16,"Selecciona la palabra que no pertenece: León, Tigre, Perro, Gato",verbal,León|Tigre|Perro|Gato,Perro,1.0
+17,Completa la analogía: Martillo es a Clavo como Tijeras es a...,verbal,Cortar|Papel|Tela|Hilo,Cortar,1.3
+18,¿Cuál es el antónimo de 'fuerte'?,verbal,Débil|Robusto|Grande|Sólido,Débil,1.6
+19,El sinónimo de 'rápido' es:,verbal,Ágil|Lento|Pesado|Tardo,Ágil,1.9
+20,¿Cuál de estas palabras está relacionada con 'sabiduría'?,verbal,Conocimiento|Ignorancia|Torpeza|Miedo,Conocimiento,1.0
+21,"Selecciona la palabra que no pertenece: León, Tigre, Perro, Gato",verbal,León|Tigre|Perro|Gato,Perro,1.3
+22,Completa la analogía: Martillo es a Clavo como Tijeras es a...,verbal,Cortar|Papel|Tela|Hilo,Cortar,1.6
+23,¿Cuál es el antónimo de 'fuerte'?,verbal,Débil|Robusto|Grande|Sólido,Débil,1.9
+24,El sinónimo de 'rápido' es:,verbal,Ágil|Lento|Pesado|Tardo,Ágil,1.0
+25,¿Cuál de estas palabras está relacionada con 'sabiduría'?,verbal,Conocimiento|Ignorancia|Torpeza|Miedo,Conocimiento,1.3
+26,"Selecciona la palabra que no pertenece: León, Tigre, Perro, Gato",mathematical,León|Tigre|Perro|Gato,Perro,1.6
+27,Completa la analogía: Martillo es a Clavo como Tijeras es a...,mathematical,Cortar|Papel|Tela|Hilo,Cortar,1.9
+28,¿Cuál es el antónimo de 'fuerte'?,mathematical,Débil|Robusto|Grande|Sólido,Débil,1.0
+29,El sinónimo de 'rápido' es:,mathematical,Ágil|Lento|Pesado|Tardo,Ágil,1.3
+30,¿Cuál de estas palabras está relacionada con 'sabiduría'?,mathematical,Conocimiento|Ignorancia|Torpeza|Miedo,Conocimiento,1.6
+31,¿Cuál es la raíz cuadrada de 169?,mathematical,11|12|13|14,13,1.9
+32,"Si 3x = 21, entonces x =",mathematical,5|6|7|8,7,1.0
+33,¿Cuál es el resultado de 9 × 6?,mathematical,52|53|54|55,54,1.3
+34,¿Cuánto es 15 + 27?,mathematical,41|42|43|44,42,1.6
+35,¿Cuál es el número primo?,mathematical,27|31|35|39,31,1.9
+36,¿Cuál es la raíz cuadrada de 169?,spatial,11|12|13|14,13,1.0
+37,"Si 3x = 21, entonces x =",spatial,5|6|7|8,7,1.3
+38,¿Cuál es el resultado de 9 × 6?,spatial,52|53|54|55,54,1.6
+39,¿Cuánto es 15 + 27?,spatial,41|42|43|44,42,1.9
+40,¿Cuál es el número primo?,spatial,27|31|35|39,31,1.0
+41,¿Cuál es la raíz cuadrada de 169?,spatial,11|12|13|14,13,1.3
+42,"Si 3x = 21, entonces x =",spatial,5|6|7|8,7,1.6
+43,¿Cuál es el resultado de 9 × 6?,spatial,52|53|54|55,54,1.9
+44,¿Cuánto es 15 + 27?,spatial,41|42|43|44,42,1.0
+45,¿Cuál es el número primo?,spatial,27|31|35|39,31,1.3
+46,"Si cortas un cubo en 27 cubos pequeños, ¿cuántos tendrán exactamente 1 cara pintada?",spatial,6|8|12|18,6,1.6
+47,Un triángulo rectángulo tiene:,spatial,Un ángulo de 90°|Todos iguales|Ninguno igual|Dos lados iguales,Un ángulo de 90°,1.9
+48,Un pentágono tiene:,spatial,4 lados|5 lados|6 lados|7 lados,5 lados,1.0
+49,"Si doblas un triángulo equilátero a la mitad, obtienes:",spatial,Dos triángulos iguales|Un cuadrado|Un rectángulo|Un trapecio,Dos triángulos iguales,1.3
+50,La figura con más lados de estas opciones es:,spatial,Hexágono|Octágono|Pentágono|Cuadrado,Octágono,1.6

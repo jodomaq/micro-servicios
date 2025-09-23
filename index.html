@@ -17,10 +17,9 @@
         <nav class="navbar">
             <div class="nav-container">
                 <div class="nav-logo">
-                    <img src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=40&h=40&fit=crop&crop=center" alt="Logo" class="logo-img">
+                    <img src="/logo.png" alt="Logo" class="logo-img">
                     <span class="logo-text">MICRO-SERVICIOS</span>
                 </div>
-                
                 <ul class="nav-menu">
                     <li class="nav-item">
                         <a href="#inicio" class="nav-link">Inicio</a>
@@ -118,7 +117,7 @@
                         <span class="feature">✓ Resultados instantáneos</span>
                         <span class="feature">✓ Análisis detallado</span>
                     </div>
-                    <a href="/IQTest" class="service-link">Realizar Test <i class="fas fa-arrow-right"></i></a>
+                    <a href="/iqtest" class="service-link">Realizar Test <i class="fas fa-arrow-right"></i></a>
                 </div>
 
                 <!-- Excel Converter -->
@@ -324,6 +323,23 @@
                     </div>
                     <a href="/ImageToPPT" class="service-link">Convertir Imagen <i class="fas fa-arrow-right"></i></a>
                 </div>
+
+                <!-- landinga page development -->
+                <div class="service-card" data-service="LandingPageDevelopment">
+                    <div class="service-icon">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <h3 class="service-title">Desarrollo de Landing Page</h3>
+                    <p class="service-description">
+                        Creamos Landing Pages efectivas y optimizadas para conversiones. Perfecto para campañas de marketing digital.
+                    </p>
+                    <div class="service-features">
+                        <span class="feature">✓ Diseño y publicación del sitio</span>
+                        <span class="feature">✓ Pagos en línea</span>
+                        <span class="feature">✓ WhatsApp integrado o chatbot con IA</span>
+                    </div>
+                    <a href="/LandingPageDevelopment/planes.png" class="service-link">Desarrollar Página <i class="fas fa-arrow-right"></i></a>
+                </div>
             </div>
         </div>
     </section>
@@ -389,37 +405,38 @@
                         </div>
                         <div class="contact-item">
                             <i class="fas fa-phone"></i>
-                            <span>+52 (55) 1234-5678</span>
+                            <span>+52 (44) 3249-7436</span>
                         </div>
                         <div class="contact-item">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span>Ciudad de México, México</span>
+                            <span>Morelia, Mich., México</span>
                         </div>
                     </div>
                 </div>
                 
                 <div class="contact-form">
-                    <form>
+                    <form id="contact-form">
                         <div class="form-group">
-                            <input type="text" placeholder="Tu Nombre" required>
+                            <input type="text" name="from_name" placeholder="Tu Nombre" required>
                         </div>
                         <div class="form-group">
-                            <input type="email" placeholder="Tu Email" required>
+                            <input type="email" name="from_email" placeholder="Tu Email" required>
                         </div>
                         <div class="form-group">
-                            <select>
-                                <option>Selecciona un Servicio</option>
-                                <option>Test de IQ</option>
-                                <option>Convertir Estados de Cuenta</option>
-                                <option>Historia Clínica con IA</option>
-                                <option>Restauración de Fotos</option>
-                                <option>Otros</option>
+                            <select name="service" required>
+                                <option value="">Selecciona un Servicio</option>
+                                <option value="desarrollo-web">Desarrollo de sitio web</option>
+                                <option value="apps-ia">Desarrollo de aplicaciones web con IA</option>
+                                <option value="apps-escritorio">Desarrollo de aplicaciones de escritorio</option>
+                                <option value="menu-qr">Menú de restaurante con QR</option>
+                                <option value="soporte">Soporte técnico</option>
+                                <option value="otros">Otros</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <textarea placeholder="Tu Mensaje" rows="5" required></textarea>
+                            <textarea name="message" placeholder="Tu Mensaje" rows="5" required></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary">Enviar Mensaje</button>
+                        <button type="submit" class="btn btn-primary" id="submit-btn">Enviar Mensaje</button>
                     </form>
                 </div>
             </div>
@@ -432,15 +449,15 @@
             <div class="footer-content">
                 <div class="footer-section">
                     <div class="footer-logo">
-                        <img src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=40&h=40&fit=crop&crop=center" alt="Logo">
+                        <img src="/logo.png" alt="Logo">
                         <span>MICRO-SERVICIOS</span>
                     </div>
                     <p>Una agencia de servicios digitales innovadora. Obten soluciones tecnológicas de expertos consultores.</p>
                     <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-linkedin"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.facebook.com/profile.php?id=61580730935431"><i class="fab fa-facebook"></i></a>
+                        <a href="https://twitter.com/"><i class="fab fa-twitter"></i></a>
+                        <a href="https://www.linkedin.com/in/donato-maldonado-b6503548/"><i class="fab fa-linkedin"></i></a>
+                        <a href="https://www.instagram.com/"><i class="fab fa-instagram"></i></a>
                     </div>
                 </div>
                 
@@ -467,13 +484,13 @@
                 <div class="footer-section">
                     <h4>Contacto</h4>
                     <p>contacto@micro-servicios.com.mx</p>
-                    <p>+52 (55) 1234-5678</p>
-                    <p>Ciudad de México, México</p>
+                    <p>+52 (44) 3249-7436</p>
+                    <p>Morelia, Mich., México</p>
                 </div>
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; 2025 Micro-Servicios.com.mx. Todos los derechos reservados.</p>
+                <p>&copy; 2025 Micro-Servicios.com.mx. Todos los derechos reservados. - <a href="/condiciones">Condiciones de Servicio</a> - <a href="/privacidad">Política de Privacidad</a></p>
             </div>
         </div>
     </footer>

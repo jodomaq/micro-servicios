@@ -177,7 +177,10 @@ body {
 .logo-img {
     width: 40px;
     height: 40px;
-    border-radius: var(--border-radius-lg);
+    border-radius: var(--border-radius-2xl);
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-block !important;
 }
 
 .logo-text {
@@ -651,7 +654,10 @@ body {
 .footer-logo img {
     width: 40px;
     height: 40px;
-    border-radius: var(--border-radius-lg);
+    border-radius: var(--border-radius-2xl);
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-block !important;
 }
 
 .footer-logo span {

@@ -1,0 +1,41 @@
+questions/id,questions/text,questions/question_type,questions/options,questions/correct_answer,questions/difficulty
+1,"¿Qué número continúa la secuencia? 3, 6, 12, 24, ...",logical,"[""36"", ""48"", ""30"", ""60""]",48,1.2
+2,"Si todos los perros son fieles y algunos fieles son valientes, entonces:",logical,"[""Todos los perros son valientes"", ""Algunos perros son valientes"", ""Ningún perro es valiente"", ""No se puede determinar""]",No se puede determinar,1.4
+3,"Si A=1, B=2, ..., Z=26, ¿cuánto vale la palabra CEREBRO?",logical,"[""64"", ""66"", ""68"", ""70""]",66,1.6
+4,"Identifica el intruso: Sol, Luna, Estrella, Río",logical,"[""Sol"", ""Luna"", ""Estrella"", ""Río""]",Río,1.8
+5,Completa la analogía: Agua es a Sed como Dinero es a...,logical,"[""Trabajo"", ""Riqueza"", ""Pobreza"", ""Necesidad""]",Necesidad,1
+6,"Si hoy es lunes, ¿qué día será dentro de 15 días?",logical,"[""Martes"", ""Miércoles"", ""Jueves"", ""Lunes""]",Martes,1.2
+7,"¿Qué número falta en la serie? 5, 10, 20, 40, ?",logical,"[""60"", ""70"", ""80"", ""100""]",80,1.4
+8,Un tren viaja a 100 km/h. ¿Cuánto tardará en recorrer 200 km?,logical,"[""1 hora"", ""2 horas"", ""3 horas"", ""4 horas""]",2 horas,1.6
+9,"Si 2x = 10, ¿cuánto vale x?",logical,"[""2"", ""3"", ""4"", ""5""]",5,1.8
+10,"Si todos los cuervos son negros y este pájaro no es negro, entonces:",logical,"[""Es un cuervo"", ""No es un cuervo"", ""Es un ave"", ""No se puede determinar""]",No es un cuervo,1
+11,"Selecciona la palabra que no pertenece: Casa, Edificio, Coche, Cabaña",verbal,"[""Casa"", ""Edificio"", ""Coche"", ""Cabaña""]",Coche,1.2
+12,Completa la analogía: Pluma es a Escribir como Guitarra es a...,verbal,"[""Música"", ""Cuerda"", ""Sonido"", ""Tocar""]",Tocar,1.4
+13,¿Cuál es el antónimo de 'rápido'?,verbal,"[""Ágil"", ""Veloz"", ""Lento"", ""Ligero""]",Lento,1.6
+14,La palabra 'felicidad' se relaciona con:,verbal,"[""Alegría"", ""Tristeza"", ""Miedo"", ""Dolor""]",Alegría,1.8
+15,Selecciona el sinónimo de 'valiente':,verbal,"[""Cobarde"", ""Atrevido"", ""Débil"", ""Frágil""]",Atrevido,1
+16,"Completa la frase: Si ríes, es porque estás...",verbal,"[""Triste"", ""Contento"", ""Asustado"", ""Enojado""]",Contento,1.2
+17,¿Cuál palabra está mal escrita?,verbal,"[""Avión"", ""Camión"", ""Balón"", ""Vision""]",Vision,1.4
+18,¿Qué significa la palabra 'efímero'?,verbal,"[""Duradero"", ""Corto"", ""Rápido"", ""Grande""]",Corto,1.6
+19,"¿Cuál palabra forma parte de la misma categoría? Perro, Gato, León, Tigre",verbal,"[""Perro"", ""Gato"", ""León"", ""Tigre""]",Perro,1.8
+20,Completa la analogía: Maestro es a Enseñar como Doctor es a...,verbal,"[""Curar"", ""Enfermedad"", ""Paciente"", ""Medicamento""]",Curar,1
+21,¿Cuál es la raíz cuadrada de 225?,mathematical,"[""13"", ""14"", ""15"", ""16""]",15,1.2
+22,"Si 5x = 25, entonces x =",mathematical,"[""4"", ""5"", ""6"", ""7""]",5,1.4
+23,¿Cuál es el resultado de 7 × 8?,mathematical,"[""54"", ""55"", ""56"", ""57""]",56,1.6
+24,"Si tienes 3 manzanas y compras 5 más, ¿cuántas tienes en total?",mathematical,"[""6"", ""7"", ""8"", ""9""]",8,1.8
+25,¿Cuál es el número primo?,mathematical,"[""21"", ""29"", ""33"", ""35""]",29,1
+26,¿Cuál es el resultado de 100 ÷ 4?,mathematical,"[""20"", ""25"", ""30"", ""40""]",25,1.2
+27,"Si x=3, ¿cuánto vale 2x + 5?",mathematical,"[""10"", ""11"", ""12"", ""13""]",11,1.4
+28,¿Cuál es el doble de 64?,mathematical,"[""120"", ""126"", ""128"", ""130""]",128,1.6
+29,¿Cuál es el 25% de 200?,mathematical,"[""25"", ""40"", ""50"", ""60""]",50,1.8
+30,¿Cuál es el siguiente número primo después de 11?,mathematical,"[""12"", ""13"", ""14"", ""15""]",13,1
+31,"Si un cubo tiene todas sus caras pintadas y luego se corta en 8 cubos más pequeños, ¿cuántos de los cubos pequeños tendrán exactamente 3 caras pintadas?",spatial,"[""2"", ""4"", ""6"", ""8""]",8,1.2
+32,Imagina un cuadrado doblado por la mitad dos veces. ¿Cuántos rectángulos pequeños se forman?,spatial,"[""2"", ""3"", ""4"", ""5""]",4,1.4
+33,"Si un triángulo tiene todos sus lados iguales, se llama:",spatial,"[""Isósceles"", ""Escaleno"", ""Equilátero"", ""Rectángulo""]",Equilátero,1.6
+34,Un hexágono tiene:,spatial,"[""5 lados"", ""6 lados"", ""7 lados"", ""8 lados""]",6 lados,1.8
+35,"Si colocas dos triángulos rectángulos iguales por sus lados más largos, forman un:",spatial,"[""Cuadrado"", ""Rectángulo"", ""Círculo"", ""Trapecio""]",Rectángulo,1
+36,¿Cuántas diagonales tiene un cuadrado?,spatial,"[""1"", ""2"", ""3"", ""4""]",2,1.2
+37,¿Cuál figura tiene todos sus lados y ángulos iguales?,spatial,"[""Triángulo isósceles"", ""Círculo"", ""Cuadrado"", ""Trapecio""]",Cuadrado,1.4
+38,"Si giras una figura 90 grados en sentido horario, su orientación es:",spatial,"[""Igual"", ""Diferente"", ""Simétrica"", ""Inversa""]",Diferente,1.6
+39,¿Qué figura tiene más lados?,spatial,"[""Pentágono"", ""Hexágono"", ""Heptágono"", ""Octágono""]",Octágono,1.8
+40,"Si doblas un rectángulo a la mitad, su forma sigue siendo:",spatial,"[""Cuadrado"", ""Rectángulo"", ""Triángulo"", ""Trapecio""]",Rectángulo,1

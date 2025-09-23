@@ -1,0 +1,24 @@
+location / {
+	alias /var/www/vhosts/micro-servicios.com.mx/httpdocs/;
+	index index.html;
+	#try_files $uri /index.html;
+}
+
+location /iqtest/ {
+	alias /var/www/vhosts/micro-servicios.com.mx/httpdocs/iqtest/;
+	index index.html;
+	try_files $uri /iqtest/index.html;
+}
+
+location /assets/ {
+	alias /var/www/vhosts/micro-servicios.com.mx/httpdocs/iqtest/assets/;
+	location ~* .(css|js)$ {}
+}
+
+location /iqtest/api/ {
+	proxy_pass http://127.0.0.1:8000/;
+	proxy_set_header Host $host;
+	proxy_set_header X-Real-IP $remote_addr;
+	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+	proxy_set_header X-Forwarded-Proto $scheme;
+}

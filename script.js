@@ -162,6 +162,42 @@ function typeWriter(element, text, speed = 100) {
     type();
 }
 
+
+// Función para mostrar notificaciones
+function showNotification(message, type) {
+    // Crear elemento de notificación
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    
+    // Estilos inline para la notificación
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 5px;
+        color: white;
+        font-weight: 500;
+        z-index: 10000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        ${type === 'success' ? 'background-color: #10b981;' : 'background-color: #ef4444;'}
+    `;
+    
+    // Agregar al DOM
+    document.body.appendChild(notification);
+    
+    // Mostrar con animación
+    setTimeout(() => notification.style.opacity = '1', 100);
+    
+    // Ocultar después de 5 segundos
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+    }, 5000);
+}
+
 // Formulario de contacto
 document.addEventListener('DOMContentLoaded', function() {
     const contactForm = document.querySelector('.contact-form form');
@@ -391,3 +427,49 @@ function showPreloader() {
 if (document.readyState === 'loading') {
     showPreloader();
 }
+
+// Contact form submission
+const contactForm = document.getElementById('contact-form');
+const submitBtn = document.getElementById('submit-btn');
+
+contactForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Change button state
+    submitBtn.textContent = 'Enviando...';
+    submitBtn.disabled = true;
+    
+    // Get form data
+    const formData = new FormData(contactForm);
+    const data = {
+        from_name: formData.get('from_name'),
+        from_email: formData.get('from_email'),
+        service: formData.get('service'),
+        message: formData.get('message')
+    };
+    
+    try {
+        const response = await fetch('https://micro-servicios.com.mx/send-email', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+            alert('¡Mensaje enviado exitosamente! Te contactaremos pronto.');
+            contactForm.reset();
+        } else {
+            const errorData = await response.json();
+            throw new Error(errorData.detail || 'Error al enviar mensaje');
+        }
+    } catch (error) {
+        alert('Error al enviar mensaje: ' + error.message);
+        console.error('Error:', error);
+    } finally {
+        // Reset button state
+        submitBtn.textContent = 'Enviar Mensaje';
+        submitBtn.disabled = false;
+    }
+});

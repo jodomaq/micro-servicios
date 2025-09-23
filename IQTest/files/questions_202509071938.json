@@ -1,0 +1,75 @@
+{
+"questions": [
+	{
+		"id" : 1,
+		"text" : "¿Qué número continúa la secuencia? 2, 4, 8, 16, ...",
+		"question_type" : "logical",
+		"options" : "[\"24\", \"32\", \"30\", \"64\"]",
+		"correct_answer" : "32",
+		"difficulty" : 1.0
+	},
+	{
+		"id" : 2,
+		"text" : "Si todos los zorros son astutos y algunos astutos son rápidos, entonces:",
+		"question_type" : "logical",
+		"options" : "[\"Todos los zorros son r\\u00e1pidos\", \"Algunos zorros son r\\u00e1pidos\", \"Ning\\u00fan zorro es r\\u00e1pido\", \"No se puede determinar\"]",
+		"correct_answer" : "No se puede determinar",
+		"difficulty" : 1.5
+	},
+	{
+		"id" : 3,
+		"text" : "Si A=1, B=2, C=3... ¿cuánto vale INTELIGENCIA?",
+		"question_type" : "logical",
+		"options" : "[\"120\", \"121\", \"122\", \"123\"]",
+		"correct_answer" : "121",
+		"difficulty" : 1.2
+	},
+	{
+		"id" : 4,
+		"text" : "Identifica la palabra que no pertenece al grupo:",
+		"question_type" : "verbal",
+		"options" : "[\"Manzana\", \"Pl\\u00e1tano\", \"Tomate\", \"Zanahoria\"]",
+		"correct_answer" : "Zanahoria",
+		"difficulty" : 1.0
+	},
+	{
+		"id" : 5,
+		"text" : "Completa la analogía: Libro es a Leer como Comida es a...",
+		"question_type" : "verbal",
+		"options" : "[\"Cocinar\", \"Comer\", \"Hambre\", \"Restaurante\"]",
+		"correct_answer" : "Comer",
+		"difficulty" : 1.0
+	},
+	{
+		"id" : 6,
+		"text" : "¿Cuál es la raíz cuadrada de 144?",
+		"question_type" : "mathematical",
+		"options" : "[\"12\", \"14\", \"16\", \"18\"]",
+		"correct_answer" : "12",
+		"difficulty" : 1.0
+	},
+	{
+		"id" : 7,
+		"text" : "Si x + y = 10 y x - y = 4, ¿cuánto vale x?",
+		"question_type" : "mathematical",
+		"options" : "[\"5\", \"6\", \"7\", \"8\"]",
+		"correct_answer" : "7",
+		"difficulty" : 1.3
+	},
+	{
+		"id" : 8,
+		"text" : "¿Qué figura completa la secuencia?",
+		"question_type" : "spatial",
+		"options" : "[\"Cuadrado\", \"Tri\\u00e1ngulo\", \"C\\u00edrculo\", \"Hex\\u00e1gono\"]",
+		"correct_answer" : "Triángulo",
+		"difficulty" : 1.2
+	},
+	{
+		"id" : 9,
+		"text" : "Si doblas este patrón, ¿qué forma obtendrás?",
+		"question_type" : "spatial",
+		"options" : "[\"Cubo\", \"Pir\\u00e1mide\", \"Cilindro\", \"Cono\"]",
+		"correct_answer" : "Cubo",
+		"difficulty" : 1.5
+	}
+]}

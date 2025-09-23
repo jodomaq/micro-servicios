@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlalchemy
+aiomysql
+aiosqlite
+pydantic
+python-dotenv
+httpx
+fpdf2
+pytest
+pytest-asyncio

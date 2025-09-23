@@ -81,3 +81,6 @@ Thumbs.db
 *.swp
 *.swo
 *.bak
+
+# Credenciales de google Cloud
+credentials.json

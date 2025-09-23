@@ -1,0 +1,731 @@
+/* Variables de color y fuente */
+:root {
+  --primary-color: #4285F4;
+  --secondary-color: #34A853;
+  --accent-color: #FBBC05;
+  --warning-color: #EA4335;
+  --background-color: #ffffff;
+  --text-color: #333333;
+  --light-gray: #f8f9fa;
+}
+
+/* Estilos generales */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: var(--text-color);
+  background-color: var(--background-color);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #3367d6;
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #2d8b46;
+}
+
+.card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Layout de la aplicación */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-header {
+  background-color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.main-nav {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-link {
+  color: var(--text-color);
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.nav-link:hover {
+  color: var(--primary-color);
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.app-footer {
+  background-color: white;
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--text-light);
+  font-size: 0.9rem;
+}
+
+/* Página de inicio */
+.home-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.home-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.home-header h1 {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: var(--text-light);
+}
+
+.hero-section {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  background-color: var(--card-color);
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  box-shadow: var(--box-shadow);
+}
+
+.hero-content {
+  flex: 1;
+}
+
+.hero-content h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.hero-content p {
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.brain-illustration {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.start-button {
+  background-color: var(--primary-color);
+  color: white;
+  font-size: 1.1rem;
+  padding: 0.8rem 1.5rem;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+  font-weight: 600;
+}
+
+.start-button:hover {
+  background-color: #1a68e0;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(43, 124, 255, 0.3);
+}
+
+.start-button.large {
+  font-size: 1.3rem;
+  padding: 1rem 2rem;
+}
+
+.benefits-section {
+  padding: 2rem 0;
+}
+
+.benefits-section h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.benefit-card {
+  background-color: var(--card-color);
+  border-radius: var(--border-radius);
+  padding: 1.5rem;
+  box-shadow: var(--box-shadow);
+  transition: var(--transition);
+}
+
+.benefit-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.benefit-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.benefit-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 0.8rem;
+}
+
+.how-it-works {
+  padding: 2rem 0;
+}
+
+.how-it-works h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+}
+
+.steps {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.step {
+  flex: 1;
+  text-align: center;
+  padding: 1.5rem;
+  background-color: var(--card-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+.step-number {
+  background-color: var(--primary-color);
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin: 0 auto 1rem;
+}
+
+.cta-container {
+  text-align: center;
+  margin: 2rem 0;
+}
+
+/* Página del Quiz */
+.quiz-container {
+  background-color: var(--card-color);
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  box-shadow: var(--box-shadow);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.quiz-container h1 {
+  text-align: center;
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+}
+
+.quiz-instructions {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--text-light);
+}
+
+.wizard {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.progress-bar {
+  height: 8px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--primary-color);
+  transition: width 0.3s ease;
+}
+
+.question-number {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.question-container {
+  margin-bottom: 2rem;
+}
+
+.question-container h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.option-button {
+  background-color: white;
+  border: 2px solid #e0e0e0;
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  font-size: 1.1rem;
+  transition: var(--transition);
+  text-align: center;
+}
+
+.option-button:hover {
+  border-color: var(--primary-color);
+  background-color: rgba(43, 124, 255, 0.05);
+}
+
+.loading-container,
+.error-container {
+  text-align: center;
+  padding: 2rem;
+  background-color: var(--card-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+.loading-spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: var(--primary-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-container button {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.7rem 1.5rem;
+  margin-top: 1rem;
+}
+
+/* Componente de Pago */
+.payment-container {
+  text-align: center;
+  padding: 2rem;
+  background-color: var(--card-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+.payment-container h2 {
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+}
+
+.benefits-section h3 {
+  margin-bottom: 1rem;
+}
+
+.benefits-list {
+  list-style-type: none;
+  margin-bottom: 2rem;
+  display: inline-block;
+  text-align: left;
+}
+
+.benefits-list li {
+  margin-bottom: 0.5rem;
+  position: relative;
+  padding-left: 30px;
+}
+
+.benefits-list li:before {
+  content: "✓";
+  color: var(--success-color);
+  position: absolute;
+  left: 0;
+  font-weight: bold;
+}
+
+.paypal-button-container {
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.error-message {
+  color: var(--error-color);
+  margin: 1rem 0;
+}
+
+/* Resultados */
+.results-container {
+  background-color: var(--card-color);
+  border-radius: var(--border-radius);
+  padding: 2rem;
+  box-shadow: var(--box-shadow);
+}
+
+.score-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.score-display {
+  font-size: 5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin: 1rem 0;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 2rem;
+}
+
+.tabs button {
+  background: none;
+  border: none;
+  padding: 1rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-light);
+  position: relative;
+}
+
+.tabs button.active {
+  color: var(--primary-color);
+}
+
+.tabs button.active:after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--primary-color);
+}
+
+.tab-content {
+  padding: 1rem 0;
+}
+
+.strengths-weaknesses {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.strengths h3,
+.weaknesses h3 {
+  margin-bottom: 1rem;
+}
+
+.strengths h3 {
+  color: var(--success-color);
+}
+
+.weaknesses h3 {
+  color: var(--warning-color);
+}
+
+.strengths ul,
+.weaknesses ul {
+  list-style-type: none;
+}
+
+.strengths li,
+.weaknesses li {
+  margin-bottom: 0.5rem;
+  position: relative;
+  padding-left: 24px;
+}
+
+.strengths li:before,
+.weaknesses li:before {
+  position: absolute;
+  left: 0;
+}
+
+.strengths li:before {
+  content: "✓";
+  color: var(--success-color);
+}
+
+.weaknesses li:before {
+  content: "!";
+  color: var(--warning-color);
+}
+
+.chart-container {
+  margin: 2rem 0;
+}
+
+.chart-container h3 {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* Certificado */
+.certificate {
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: white;
+  padding: 2rem;
+  box-shadow: var(--box-shadow);
+  text-align: center;
+}
+
+.certificate-content {
+  border: 10px solid #f0f0f0;
+  padding: 3rem;
+  position: relative;
+  margin-bottom: 2rem;
+  background: linear-gradient(45deg, #f9f9f9 25%, transparent 25%, transparent 75%, #f9f9f9 75%), linear-gradient(45deg, #f9f9f9 25%, transparent 25%, transparent 75%, #f9f9f9 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+}
+
+.certificate-header {
+  margin-bottom: 2rem;
+}
+
+.certificate-logo {
+  font-size: 3rem;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.certificate-text {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.certificate-name {
+  color: var(--primary-color);
+  font-size: 2.5rem;
+  margin: 1.5rem 0;
+}
+
+.certificate-score {
+  font-size: 3.5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin: 1.5rem 0;
+}
+
+.certificate-level {
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+}
+
+.certificate-date {
+  font-style: italic;
+  margin-bottom: 2rem;
+}
+
+.certificate-seal {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto;
+}
+
+.print-button {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border-radius: var(--border-radius);
+  font-weight: 500;
+}
+
+/* Botones de compartir */
+.share-container {
+  margin-top: 3rem;
+  text-align: center;
+}
+
+.share-container h3 {
+  margin-bottom: 1.5rem;
+}
+
+.share-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.share-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.8rem;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+  min-width: 100px;
+}
+
+.share-button svg {
+  margin-bottom: 0.5rem;
+}
+
+.share-button.facebook {
+  background-color: rgba(59, 89, 152, 0.1);
+}
+
+.share-button.twitter {
+  background-color: rgba(29, 161, 242, 0.1);
+}
+
+.share-button.instagram {
+  background-color: rgba(225, 48, 108, 0.1);
+}
+
+.share-button.whatsapp {
+  background-color: rgba(37, 211, 102, 0.1);
+}
+
+.share-button:hover {
+  transform: translateY(-3px);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1rem;
+  }
+  
+  .hero-section {
+    flex-direction: column;
+    padding: 1.5rem;
+  }
+  
+  .steps {
+    flex-direction: column;
+  }
+  
+  .step {
+    margin-bottom: 1rem;
+  }
+  
+  .options-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .strengths-weaknesses {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .certificate-content {
+    padding: 1.5rem;
+  }
+  
+  .certificate-score {
+    font-size: 2.5rem;
+  }
+}
+
+/* Estilos de impresión para el certificado */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  .certificate,
+  .certificate * {
+    visibility: visible;
+  }
+  
+  .certificate {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    box-shadow: none;
+  }
+  
+  .print-button {
+    display: none;
+  }
+}
