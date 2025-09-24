@@ -2,7 +2,7 @@ import os
 import uuid
 import logging
 from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import StreamingResponse, JSONResponse, Response
 from pydantic import BaseModel
 
 from .converter import convert_pdf_to_excel
@@ -88,8 +88,43 @@ async def paypal_capture_and_convert(body: CaptureBody):
             pass
 
     filename = "estado_cuenta.xlsx"
-    return StreamingResponse(
-        content=bytes(excel_bytes),
+    return Response(
+        content=excel_bytes,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+
+
+class ConvertBody(BaseModel):
+    """Body for direct conversion without payment (testing mode)."""
+    upload_id: str
+
+
+@router.post("/convert")
+async def convert_without_payment(body: ConvertBody):
+    """
+    Directly convert the previously uploaded PDF to Excel without PayPal capture.
+    Intended for local/testing flows used by the frontend.
+    """
+    tmp_dir = os.path.join(os.getcwd(), "tmp_uploads")
+    pdf_path = os.path.join(tmp_dir, f"{body.upload_id}.pdf")
+    if not os.path.isfile(pdf_path):
+        raise HTTPException(status_code=404, detail="Archivo no encontrado, vuelve a subir el PDF")
+
+    try:
+        excel_bytes = convert_pdf_to_excel(pdf_path, max_pages=10)
+    except Exception as e:
+        logger.error("Conversion error (no-paypal): %s", e)
+        raise HTTPException(status_code=400, detail=str(e))
+    finally:
+        try:
+            os.remove(pdf_path)
+        except Exception:
+            pass
+
+    filename = "estado_cuenta.xlsx"
+    return Response(
+        content=excel_bytes,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
