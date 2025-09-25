@@ -5,7 +5,8 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
 from fastapi.responses import StreamingResponse, JSONResponse, Response
 from pydantic import BaseModel
 
-from .converter import convert_pdf_to_excel
+from .converter_ai_vision import convert_pdf_to_excel_ai_vision
+from .converter_ai_full import convert_pdf_to_excel_ai_full
 from .paypal_client import create_order, capture_order, OrderRequest, CartItem
 
 logger = logging.getLogger("routes")
@@ -76,7 +77,8 @@ async def paypal_capture_and_convert(body: CaptureBody):
     if not os.path.isfile(pdf_path):
         raise HTTPException(status_code=404, detail="Archivo no encontrado, vuelve a subir el PDF")
     try:
-        excel_bytes = convert_pdf_to_excel(pdf_path, max_pages=10)
+        # Estrategia FULL (PDF completo) para máxima fidelidad
+        excel_bytes = convert_pdf_to_excel_ai_full(pdf_path)
     except Exception as e:
         logger.error("Conversion error: %s", e)
         raise HTTPException(status_code=400, detail=str(e))
@@ -112,7 +114,7 @@ async def convert_without_payment(body: ConvertBody):
         raise HTTPException(status_code=404, detail="Archivo no encontrado, vuelve a subir el PDF")
 
     try:
-        excel_bytes = convert_pdf_to_excel(pdf_path, max_pages=10)
+        excel_bytes = convert_pdf_to_excel_ai_full(pdf_path)
     except Exception as e:
         logger.error("Conversion error (no-paypal): %s", e)
         raise HTTPException(status_code=400, detail=str(e))
