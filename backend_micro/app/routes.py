@@ -113,7 +113,6 @@ async def convert_without_payment(body: ConvertBody):
     pdf_path = os.path.join(tmp_dir, f"{body.upload_id}.pdf")
     if not os.path.isfile(pdf_path):
         raise HTTPException(status_code=404, detail="Archivo no encontrado, vuelve a subir el PDF")
-
     try:
         excel_bytes = convert_pdf_to_excel_ai_vision_2(pdf_path)
     except Exception as e:

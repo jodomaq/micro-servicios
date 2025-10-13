@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from typing import Iterable, List, Optional, Sequence
 
 import pandas as pd
-from pydantic import BaseModel, ValidationError, root_validator, validator
+from pydantic import BaseModel, ValidationError, field_validator, model_validator
 
 from .converter import _write_excel
 
@@ -37,7 +37,7 @@ class StatementEntry(BaseModel):
     moneda: Optional[str] = None
 
     # Normalise date strings to timezone-naive ISO strings
-    @validator("fecha", pre=True)
+    @field_validator("fecha", mode="before")
     def _parse_fecha(cls, value: object) -> datetime:
         if value in (None, "", "null"):
             raise ValueError("fecha vacía")
@@ -54,14 +54,14 @@ class StatementEntry(BaseModel):
             dt = dt.astimezone(timezone.utc).replace(tzinfo=None)
         return dt
 
-    @validator("descripcion", "categoria", pre=True)
+    @field_validator("descripcion", "categoria", mode="before")
     def _clean_string(cls, value: object) -> str:
         text = _clean_str(value)
         if not text:
             raise ValueError("texto requerido")
         return text
 
-    @validator("referencia", pre=True)
+    @field_validator("referencia", mode="before")
     def _clean_ref(cls, value: object) -> str:
         text = _clean_str(value)
         if not text:
@@ -70,31 +70,31 @@ class StatementEntry(BaseModel):
             return "SIN-REF"
         return text
 
-    @validator("monto", pre=True)
+    @field_validator("monto", mode="before")
     def _parse_amount(cls, value: object) -> float:
         amount = _parse_monetary_value(value)
         if amount is None:
             raise ValueError("monto inválido")
         return amount
 
-    @validator("moneda", pre=True, always=True)
+    @field_validator("moneda", mode="before")
     def _normalize_currency(cls, value: object) -> Optional[str]:
         if value in (None, "", "null"):
             return None
         return _clean_currency(value)
 
-    @root_validator
-    def _ensure_cargo_sign(cls, values):
-        monto = values.get("monto")
+    @model_validator(mode="after")
+    def _ensure_cargo_sign(cls, model: "StatementEntry") -> "StatementEntry":
+        monto = model.monto
         if monto is None:
-            return values
-        descripcion = values.get("descripcion", "").lower()
+            return model
+        descripcion = model.descripcion.lower()
         # For cards, cargos frequently labelled "cargo", "retiro", etc.
         if any(token in descripcion for token in ("cargo", "retiro", "compra")) and monto > 0:
-            values["monto"] = -abs(monto)
+            model.monto = -abs(monto)
         if any(token in descripcion for token in ("abono", "deposito", "pago")) and monto < 0:
-            values["monto"] = abs(monto)
-        return values
+            model.monto = abs(monto)
+        return model
 
 
 class StatementPayload(BaseModel):
