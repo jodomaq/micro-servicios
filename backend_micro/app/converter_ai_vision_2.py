@@ -242,10 +242,10 @@ def _extract_pdf_content(pdf_path: str, max_pages: Optional[int] = None, dpi: in
 
 
 def _call_openai_vision(batch: Sequence[PageContent]) -> List[dict]:
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
-        raise RuntimeError("OPENAI_API_KEY no está configurado")
-    vision_model = os.getenv("OPENAI_VISION_MODEL", "gpt-4o-mini")
+        raise RuntimeError("OPENROUTER_API_KEY no está configurado")
+    vision_model = os.getenv("OPENAI_FULL_MODEL", "anthropic/claude-sonnet-4.5")
     temperature = float(os.getenv("OPENAI_VISION_TEMPERATURE", "0.0"))
 
     try:
