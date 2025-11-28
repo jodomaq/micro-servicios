@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from .converter_ai_vision_2 import convert_pdf_to_excel_ai_vision_2
 from .converter_ai_vision import convert_pdf_to_excel_ai_vision
 from .converter_ai_full import convert_pdf_to_excel_ai_full
+from .converterIA import convert_pdf_to_excel_ai
 from .paypal_client import create_order, capture_order, OrderRequest, CartItem
 
 logger = logging.getLogger("routes")
@@ -114,7 +115,7 @@ async def convert_without_payment(body: ConvertBody):
     if not os.path.isfile(pdf_path):
         raise HTTPException(status_code=404, detail="Archivo no encontrado, vuelve a subir el PDF")
     try:
-        excel_bytes = convert_pdf_to_excel_ai_vision_2(pdf_path)
+        excel_bytes = convert_pdf_to_excel_ai(pdf_path)
     except Exception as e:
         logger.error("Conversion error (no-paypal): %s", e)
         raise HTTPException(status_code=400, detail=str(e))

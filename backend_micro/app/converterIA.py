@@ -11,6 +11,20 @@ from .converter import _write_excel  # reuse the existing Excel writer
 logger = logging.getLogger("converter_ai")
 
 
+def _strip_markdown_json(text: str) -> str:
+    """Remove markdown code block formatting from JSON responses."""
+    text = text.strip()
+    # Remove ```json at the start
+    if text.startswith('```json'):
+        text = text[7:]
+    elif text.startswith('```'):
+        text = text[3:]
+    # Remove ``` at the end
+    if text.endswith('```'):
+        text = text[:-3]
+    return text.strip()
+
+
 def _extract_pdf_text_by_page(pdf_path: str, max_pages: int = 10) -> List[str]:
     """Extract raw text from each page of the PDF. If pdfplumber fails, raise an error.
 
@@ -29,7 +43,7 @@ def _extract_pdf_text_by_page(pdf_path: str, max_pages: int = 10) -> List[str]:
 
 
 def _call_openai_for_rows(pages_payload: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """Call OpenAI Chat Completions with the given pages payload and expect strict JSON rows.
+    """Call OpenRouter (Claude Sonnet 4.5) with the given pages payload and expect strict JSON rows.
 
     Returns a list of row dicts. Keys allowed (the model may return a subset):
     - Fecha de Operacion
@@ -47,13 +61,20 @@ def _call_openai_for_rows(pages_payload: List[Dict[str, Any]]) -> List[Dict[str,
     if not api_key:
         raise RuntimeError("OPENROUTER_API_KEY no está configurado en el entorno.")
 
-    model = os.getenv("OPENAI_QA_MODEL", "anthropic/claude-opus-4.5")
+    model = os.getenv("OPENAI_QA_MODEL", "anthropic/claude-sonnet-4.5")
 
     try:
         from openai import OpenAI
-        client = OpenAI(api_key=api_key)
+        client = OpenAI(
+            api_key=api_key,
+            base_url="https://openrouter.ai/api/v1",
+            default_headers={
+                "HTTP-Referer": "https://github.com/your-org/backend_micro",
+                "X-Title": "Bank Statement Converter"
+            }
+        )
     except Exception as e:
-        raise RuntimeError(f"No se pudo inicializar OpenAI: {e}")
+        raise RuntimeError(f"No se pudo inicializar OpenAI SDK: {e}")
 
     system = (
         "Eres un analista de estados de cuenta bancarios. Recibirás texto crudo de un PDF (por páginas). "
@@ -76,20 +97,37 @@ def _call_openai_for_rows(pages_payload: List[Dict[str, Any]]) -> List[Dict[str,
         "pages": pages_payload,
     }
 
-    resp = client.chat.completions.create(
-        model=model,
-        response_format={"type": "json_object"},
-        messages=[
-            {"role": "system", "content": system},
-            {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False)},
-        ],
-        temperature=0.1,
-    )
-    content = resp.choices[0].message.content
-    data = json.loads(content)
+    try:
+        resp = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False)},
+            ],
+            temperature=0.1,
+            max_tokens=4000,
+        )
+        content = resp.choices[0].message.content
+        
+        logger.debug("OpenRouter response: %s", content[:500] if content else "EMPTY")
+        
+        if not content or content.strip() == "":
+            raise RuntimeError("OpenRouter devolvió respuesta vacía")
+            
+    except Exception as e:
+        raise RuntimeError(f"Error llamando a OpenRouter: {e}")
+
+    try:
+        content = _strip_markdown_json(content)
+        data = json.loads(content)
+    except json.JSONDecodeError as e:
+        logger.error("JSON inválido recibido: %s", content[:1000] if content else "EMPTY")
+        raise RuntimeError(f"La respuesta no es JSON válido: {e}")
+
     rows = data.get("rows")
     if not isinstance(rows, list):
-        raise RuntimeError("La respuesta de OpenAI no contiene 'rows' válidas.")
+        logger.error("Payload sin 'rows': %s", data)
+        raise RuntimeError("La respuesta de OpenRouter no contiene 'rows' válidas.")
     return rows
 
 

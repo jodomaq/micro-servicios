@@ -23,6 +23,21 @@ from .converter import _write_excel
 
 logger = logging.getLogger("converter_ai_vision_2")
 
+
+def _strip_markdown_json(text: str) -> str:
+    """Remove markdown code block formatting from JSON responses."""
+    text = text.strip()
+    # Remove ```json at the start
+    if text.startswith('```json'):
+        text = text[7:]
+    elif text.startswith('```'):
+        text = text[3:]
+    # Remove ``` at the end
+    if text.endswith('```'):
+        text = text[:-3]
+    return text.strip()
+
+
 # ---------------------------------------------------------------------------
 # Data structures
 # ---------------------------------------------------------------------------
@@ -253,7 +268,14 @@ def _call_openai_vision(batch: Sequence[PageContent]) -> List[dict]:
     except Exception as exc:  # pragma: no cover - import guard
         raise RuntimeError(f"No se pudo importar OpenAI SDK: {exc}")
 
-    client = OpenAI(api_key=api_key)
+    client = OpenAI(
+        api_key=api_key,
+        base_url="https://openrouter.ai/api/v1",
+        default_headers={
+            "HTTP-Referer": "https://github.com/your-org/backend_micro",
+            "X-Title": "Bank Statement Converter"
+        }
+    )
 
     instructions = {
         "task": "Extraer movimientos bancarios detallados",
@@ -304,7 +326,6 @@ def _call_openai_vision(batch: Sequence[PageContent]) -> List[dict]:
     try:
         response = client.chat.completions.create(
             model=vision_model,
-            response_format={"type": "json_object"},
             messages=[
                 {
                     "role": "system",
@@ -317,19 +338,28 @@ def _call_openai_vision(batch: Sequence[PageContent]) -> List[dict]:
                 {"role": "user", "content": user_content},
             ],
             temperature=temperature,
-            max_tokens=2000,
+            max_tokens=4000,
         )
     except Exception as exc:
-        raise RuntimeError(f"Fallo al llamar OpenAI Vision: {exc}")
+        raise RuntimeError(f"Fallo al llamar OpenRouter: {exc}")
+
+    content = response.choices[0].message.content
+    logger.debug("OpenRouter response content: %s", content[:500] if content else "EMPTY")
+    
+    if not content or content.strip() == "":
+        raise RuntimeError("OpenRouter devolvió respuesta vacía")
 
     try:
-        payload = json.loads(response.choices[0].message.content or "{}")
+        content = _strip_markdown_json(content)
+        payload = json.loads(content)
     except json.JSONDecodeError as exc:
-        raise RuntimeError(f"OpenAI devolvió JSON inválido: {exc}")
+        logger.error("JSON inválido recibido: %s", content[:1000])
+        raise RuntimeError(f"OpenRouter devolvió JSON inválido: {exc}")
 
     rows = payload.get("rows")
     if not isinstance(rows, list):
-        raise RuntimeError("La respuesta de OpenAI no incluye 'rows'")
+        logger.error("Payload recibido sin 'rows': %s", payload)
+        raise RuntimeError("La respuesta de OpenRouter no incluye 'rows'")
     return rows
 
 

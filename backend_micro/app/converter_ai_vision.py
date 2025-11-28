@@ -12,6 +12,20 @@ from .converter import _write_excel  # reutilizamos el writer existente
 logger = logging.getLogger("converter_ai_vision")
 
 
+def _strip_markdown_json(text: str) -> str:
+    """Remove markdown code block formatting from JSON responses."""
+    text = text.strip()
+    # Remove ```json at the start
+    if text.startswith('```json'):
+        text = text[7:]
+    elif text.startswith('```'):
+        text = text[3:]
+    # Remove ``` at the end
+    if text.endswith('```'):
+        text = text[:-3]
+    return text.strip()
+
+
 # =============================
 # Extracción de texto enriquecida
 # =============================
@@ -104,16 +118,16 @@ def _call_openai_for_rows_vision(
     pages_payload: List[Dict[str, Any]],
     image_data_urls: Optional[List[str]] = None,
     force_vision: bool = False,
-    model_text: str = "gpt-4o-mini",
-    model_vision: str = "gpt-4o-mini"  # gpt-4o-mini soporta visión; ajustar si se usa otro modelo
+    model_text: str = "anthropic/claude-sonnet-4.5",
+    model_vision: str = "anthropic/claude-sonnet-4.5"
 ) -> List[Dict[str, Any]]:
-    """Invoca OpenAI combinando texto (pages_payload) y opcionalmente imágenes.
+    """Invoca OpenRouter (Claude Sonnet 4.5) combinando texto (pages_payload) y opcionalmente imágenes.
 
     Emplea el endpoint de chat.completions para mantener consistencia con el código actual.
     """
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
-        raise RuntimeError("OPENAI_API_KEY no está configurado.")
+        raise RuntimeError("OPENROUTER_API_KEY no está configurado.")
 
     # Import dinámico para seguir el patrón del proyecto
     try:
@@ -121,7 +135,14 @@ def _call_openai_for_rows_vision(
     except Exception as e:
         raise RuntimeError(f"No se pudo importar OpenAI SDK: {e}")
 
-    client = OpenAI(api_key=api_key)
+    client = OpenAI(
+        api_key=api_key,
+        base_url="https://openrouter.ai/api/v1",
+        default_headers={
+            "HTTP-Referer": "https://github.com/your-org/backend_micro",
+            "X-Title": "Bank Statement Converter"
+        }
+    )
 
     use_vision = force_vision or (image_data_urls and len(image_data_urls) > 0)
     model = model_vision if use_vision else model_text
@@ -154,25 +175,34 @@ def _call_openai_for_rows_vision(
     try:
         resp = client.chat.completions.create(
             model=model,
-            response_format={"type": "json_object"},
             messages=[
                 {"role": "system", "content": system},
                 {"role": "user", "content": user_content},
             ],
             temperature=0.1,
+            max_tokens=4000,
         )
         content = resp.choices[0].message.content
+        
+        logger.debug("OpenRouter response content: %s", content[:500] if content else "EMPTY")
+        
+        if not content or content.strip() == "":
+            raise RuntimeError("OpenRouter devolvió respuesta vacía")
+            
     except Exception as e:
-        raise RuntimeError(f"Error llamando a OpenAI: {e}")
+        raise RuntimeError(f"Error llamando a OpenRouter: {e}")
 
     try:
+        content = _strip_markdown_json(content)
         data = json.loads(content)
     except Exception as e:
+        logger.error("JSON inválido recibido: %s", content[:1000] if content else "EMPTY")
         raise RuntimeError(f"Respuesta no es JSON válido: {e}")
 
     rows = data.get("rows")
     if not isinstance(rows, list):
-        raise RuntimeError("La respuesta de OpenAI no contiene 'rows' válidas.")
+        logger.error("Payload recibido sin 'rows': %s", data)
+        raise RuntimeError("La respuesta de OpenRouter no contiene 'rows' válidas.")
     return rows
 
 
