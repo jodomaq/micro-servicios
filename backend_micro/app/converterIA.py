@@ -43,11 +43,11 @@ def _call_openai_for_rows(pages_payload: List[Dict[str, Any]]) -> List[Dict[str,
     - Liquidacion
     - Monto
     """
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
-        raise RuntimeError("OPENAI_API_KEY no está configurado en el entorno.")
+        raise RuntimeError("OPENROUTER_API_KEY no está configurado en el entorno.")
 
-    model = os.getenv("OPENAI_QA_MODEL", "gpt-4o-mini")
+    model = os.getenv("OPENAI_QA_MODEL", "anthropic/claude-opus-4.5")
 
     try:
         from openai import OpenAI

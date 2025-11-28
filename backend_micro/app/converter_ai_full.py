@@ -107,11 +107,11 @@ def _call_openai_full_pdf(pdf_path: str, model: Optional[str] = None, max_retrie
 
     Usa el endpoint Responses (más flexible) con referencia directa al archivo.
     """
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
-        raise RuntimeError("OPENAI_API_KEY no está configurado.")
+        raise RuntimeError("OPENROUTER_API_KEY no está configurado.")
 
-    model = model or os.getenv("OPENAI_FULL_MODEL", "gpt-5-mini")
+    model = model or os.getenv("OPENAI_FULL_MODEL", "anthropic/claude-sonnet-4.5")
 
     # Tamaño razonable (evitar subir PDFs enormes que excedan límites típicos ~25MB)
     size_bytes = os.path.getsize(pdf_path)
