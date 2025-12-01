@@ -1,14 +1,61 @@
-:root{--bg:#0e0f13;--card:#151822;--text:#e8eaf1;--muted:#a7b0c0;--primary:#4f8cff}
+:root{--bg:#0e0f13;--card:#151822;--text:#e8eaf1;--muted:#a7b0c0;--primary:#4f8cff;--success:#6ee7b7;--error:#fca5a5;--warning:#fbbf24}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial}
-.container{max-width:920px;margin:0 auto;padding:28px}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.container{max-width:1200px;margin:0 auto;padding:28px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.header-actions{display:flex;gap:12px}
 .card{background:var(--card);border-radius:16px;padding:24px;border:1px solid #24283b}
-.btn{background:var(--primary);color:#fff;border:none;padding:12px 16px;border-radius:10px;font-weight:600;cursor:pointer}
-.btn:disabled{opacity:.6;cursor:not-allowed}
+.btn{background:var(--primary);color:#fff;border:none;padding:12px 16px;border-radius:10px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.btn:hover{opacity:0.9;transform:translateY(-1px)}
+.btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-secondary{background:#374151}
+.btn-success{background:#10b981}
+.btn-danger{background:#ef4444}
+.btn-primary{background:var(--primary)}
 .input{background:#0c0f16;border:1px dashed #2b3350;border-radius:12px;padding:18px;color:var(--muted)}
 .row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-.footer{opacity:.8;margin-top:20px;font-size:12px}
+.footer{opacity:.8;margin-top:20px;font-size:12px;text-align:center}
+.user-greeting{color:var(--success);font-weight:600}
 hr{border:0;border-top:1px solid #24283b;margin:18px 0}
-.success{color:#6ee7b7}
-.error{color:#fca5a5}
+.success{color:var(--success)}
+.error{color:var(--error)}
+
+/* Login Section */
+.login-section{background:var(--card);border-radius:12px;padding:20px;margin-bottom:20px;text-align:center;border:1px solid #24283b}
+#googleSignInButton{display:inline-block;margin-top:12px}
+
+/* Dashboard */
+.dashboard{display:flex;flex-direction:column;gap:24px}
+.user-info{display:flex;justify-content:space-between;align-items:center;padding:20px;background:#1a1f2e;border-radius:12px}
+.user-header{display:flex;align-items:center;gap:12px}
+.user-avatar{width:48px;height:48px;border-radius:50%;border:2px solid var(--primary)}
+.subscription-info,.no-subscription,.stats,.recent-conversions{background:#1a1f2e;padding:20px;border-radius:12px}
+.subscription-details{margin:16px 0}
+.subscription-details p{margin:8px 0}
+.recent-conversions ul{list-style:none;padding:0;margin:12px 0 0}
+.recent-conversions li{display:flex;justify-content:space-between;padding:12px;background:var(--card);margin-bottom:8px;border-radius:8px}
+.dashboard-loading{text-align:center;padding:40px}
+
+/* Subscription Plans */
+.subscription-plans{padding:20px 0}
+.plans-subtitle{text-align:center;color:var(--muted);margin-bottom:32px}
+.plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin:24px 0}
+.plan-card{background:#1a1f2e;border-radius:16px;padding:28px;border:2px solid #24283b;transition:all 0.3s;position:relative}
+.plan-card:hover{border-color:var(--primary);transform:translateY(-4px)}
+.plan-card.popular{border-color:var(--primary)}
+.popular-badge{position:absolute;top:-12px;right:20px;background:var(--primary);color:#fff;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700}
+.plan-card h3{margin:0 0 16px;font-size:24px}
+.plan-price{display:flex;align-items:baseline;gap:8px;margin-bottom:12px}
+.plan-price .price{font-size:48px;font-weight:700;color:var(--primary)}
+.plan-price .currency{color:var(--muted);font-size:16px}
+.plan-conversions{font-size:20px;margin:16px 0;color:var(--success)}
+.plan-description{color:var(--muted);margin:8px 0}
+.plan-features{margin:20px 0;padding:20px 0;border-top:1px solid #24283b;border-bottom:1px solid #24283b}
+.plan-features p{margin:8px 0;color:var(--muted)}
+.price-per-conversion{text-align:center;margin-top:12px;font-size:12px;color:var(--muted)}
+.login-prompt{text-align:center;margin-top:24px;padding:16px;background:#1a1f2e;border-radius:8px;color:var(--warning)}
+
+/* Payment Mode Selector */
+.payment-mode-selector{display:flex;gap:12px;margin:20px 0;justify-content:center}
+.onetime-payment,.subscription-payment{margin-top:24px}
+.subscription-notice{background:#1a1f2e;padding:16px;border-radius:8px;margin:16px 0;border-left:4px solid var(--success)}

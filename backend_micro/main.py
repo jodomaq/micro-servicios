@@ -19,15 +19,39 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://micro-servicios.com.mx", "http://localhost:5173", "http://localhost:5174"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
+# Initialize database
+try:
+    from app.database import engine, Base
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database initialized successfully")
+except Exception as e:
+    logger.warning(f"Database initialization skipped: {e}")
+
+# Include routers
 try:
     from app.routes import router as converter_router
     app.include_router(converter_router)
+    logger.info("Converter routes loaded")
 except Exception as e:
     logger.warning(f"Excel Converter routes not loaded: {e}")
+
+try:
+    from app.auth_routes import router as auth_router
+    app.include_router(auth_router)
+    logger.info("Auth routes loaded")
+except Exception as e:
+    logger.warning(f"Auth routes not loaded: {e}")
+
+try:
+    from app.subscription_routes import router as subscription_router
+    app.include_router(subscription_router)
+    logger.info("Subscription routes loaded")
+except Exception as e:
+    logger.warning(f"Subscription routes not loaded: {e}")
 
 class ContactForm(BaseModel):
     from_name: str
