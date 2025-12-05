@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5173'
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 
 export default function GoogleLogin() {
