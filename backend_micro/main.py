@@ -133,6 +133,16 @@ except Exception as e:
     logger.warning(f"Rutas Estructura Política no cargadas: {e}")
 
 # ====================================
+# SUB-APP — IQ Test (montada en /iqtest/api)
+# ====================================
+try:
+    from app.iqtest.main import app as iqtest_app
+    app.mount("/iqtest/api", iqtest_app)
+    logger.info("IQ Test montado en /iqtest/api")
+except Exception as e:
+    logger.warning(f"IQ Test no montado: {e}")
+
+# ====================================
 # ROUTERS — Mesa de Regalos
 # ====================================
 try:

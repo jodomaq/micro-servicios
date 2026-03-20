@@ -70,6 +70,13 @@ aiosmtplib               # Estructura Política (async SMTP)
 email-validator
 
 # ====================================
+# IQ TEST — async DB drivers
+# ====================================
+aiomysql                  # MySQL async (IQ Test)
+aiosqlite                 # SQLite async (IQ Test tests)
+
+# ====================================
 # TESTS
 # ====================================
 pytest
+pytest-asyncio
