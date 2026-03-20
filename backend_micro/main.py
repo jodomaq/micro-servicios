@@ -12,46 +12,139 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-app = FastAPI(title="Micro-Servicios API")
+app = FastAPI(
+    title="Micro-Servicios API",
+    description="API unificada: Excel Converter, Estructura Política y Mesa de Regalos",
+    version="2.0.0"
+)
 
-# Configure CORS
+# ====================================
+# CORS
+# ====================================
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://micro-servicios.com.mx", "http://localhost:5173", "http://localhost:5174"],
+    allow_origins=[
+        "https://micro-servicios.com.mx",
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
+        "http://localhost:5176",
+    ],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
 )
 
-# Initialize database
+# ====================================
+# MIDDLEWARE — Estructura Política (multi-tenant)
+# ====================================
+try:
+    from app.estructura_politica.middleware.tenant_middleware import TenantMiddleware
+    app.add_middleware(TenantMiddleware)
+    logger.info("TenantMiddleware de Estructura Política cargado")
+except Exception as e:
+    logger.warning(f"TenantMiddleware no cargado: {e}")
+
+# ====================================
+# INICIALIZACIÓN DE BASES DE DATOS
+# ====================================
+
+# Excel Converter — SQLite
 try:
     from app.database import engine, Base
     Base.metadata.create_all(bind=engine)
-    logger.info("Database initialized successfully")
+    logger.info("DB Excel Converter inicializada")
 except Exception as e:
-    logger.warning(f"Database initialization skipped: {e}")
+    logger.warning(f"DB Excel Converter no inicializada: {e}")
 
-# Include routers
+# Estructura Política — MySQL/MariaDB
+try:
+    from app.estructura_politica.database import create_db_and_tables as ep_create_tables
+    ep_create_tables()
+    logger.info("DB Estructura Política inicializada")
+except Exception as e:
+    logger.warning(f"DB Estructura Política no inicializada: {e}")
+
+# Mesa de Regalos — MySQL/MariaDB
+try:
+    from app.mesa_regalos.core.database import engine as mr_engine, Base as mr_Base
+    from app.mesa_regalos.models.models import User, GiftTable, Gift  # registrar modelos
+    mr_Base.metadata.create_all(bind=mr_engine)
+    logger.info("DB Mesa de Regalos inicializada")
+except Exception as e:
+    logger.warning(f"DB Mesa de Regalos no inicializada: {e}")
+
+# ====================================
+# ROUTERS — Excel Converter
+# ====================================
 try:
     from app.routes import router as converter_router
     app.include_router(converter_router)
-    logger.info("Converter routes loaded")
+    logger.info("Rutas Excel Converter cargadas")
 except Exception as e:
-    logger.warning(f"Excel Converter routes not loaded: {e}")
+    logger.warning(f"Rutas Excel Converter no cargadas: {e}")
 
 try:
     from app.auth_routes import router as auth_router
     app.include_router(auth_router)
-    logger.info("Auth routes loaded")
+    logger.info("Rutas Auth (Converter) cargadas")
 except Exception as e:
-    logger.warning(f"Auth routes not loaded: {e}")
+    logger.warning(f"Rutas Auth (Converter) no cargadas: {e}")
 
 try:
     from app.subscription_routes import router as subscription_router
     app.include_router(subscription_router)
-    logger.info("Subscription routes loaded")
+    logger.info("Rutas Suscripciones cargadas")
 except Exception as e:
-    logger.warning(f"Subscription routes not loaded: {e}")
+    logger.warning(f"Rutas Suscripciones no cargadas: {e}")
+
+# ====================================
+# ROUTERS — Estructura Política
+# ====================================
+try:
+    from app.estructura_politica.routers import (
+        auth as ep_auth,
+        committees,
+        administrative_units,
+        committee_types,
+        users as ep_users,
+        admin as ep_admin,
+        events,
+        attendance,
+        surveys,
+        dashboard as ep_dashboard,
+        secciones,
+        public as ep_public,
+    )
+    app.include_router(ep_auth.router, prefix="/api")
+    app.include_router(committees.router, prefix="/api")
+    app.include_router(administrative_units.router, prefix="/api")
+    app.include_router(committee_types.router, prefix="/api")
+    app.include_router(ep_users.router, prefix="/api")
+    app.include_router(ep_admin.router, prefix="/api")
+    app.include_router(events.router, prefix="/api")
+    app.include_router(attendance.router, prefix="/api")
+    app.include_router(surveys.router, prefix="/api")
+    app.include_router(ep_dashboard.router, prefix="/api")
+    app.include_router(secciones.router, prefix="/api")
+    app.include_router(ep_public.router, prefix="/api")
+    logger.info("Rutas Estructura Política cargadas (12 routers)")
+except Exception as e:
+    logger.warning(f"Rutas Estructura Política no cargadas: {e}")
+
+# ====================================
+# ROUTERS — Mesa de Regalos
+# ====================================
+try:
+    from app.mesa_regalos.routers import auth as mr_auth
+    app.include_router(mr_auth.router)
+    logger.info("Rutas Mesa de Regalos cargadas")
+except Exception as e:
+    logger.warning(f"Rutas Mesa de Regalos no cargadas: {e}")
+
+# ====================================
+# ENDPOINTS GENERALES
+# ====================================
 
 class ContactForm(BaseModel):
     from_name: str
@@ -59,7 +152,7 @@ class ContactForm(BaseModel):
     service: str
     message: str
 
-# Add middleware to log all requests
+
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     logger.info(f"Received {request.method} request to {request.url.path}")
@@ -68,26 +161,28 @@ async def log_requests(request: Request, call_next):
     response = await call_next(request)
     return response
 
+
 @app.get("/")
 async def root():
     return {
-        "message": "Micro-Servicios Contact API",
+        "message": "Micro-Servicios API",
+        "version": "2.0.0",
         "status": "active",
-        "endpoints": {
-            "send_email": "/send-email (POST)",
-            "health": "/health (GET)"
-        }
+        "services": [
+            "Excel Converter (/auth, /converter, /subscriptions)",
+            "Estructura Política (/api/auth, /api/committees, /api/...)",
+            "Mesa de Regalos (/api/v1/auth, /api/v1/...)",
+        ]
     }
 
-# Add a health check endpoint
+
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "service": "contact-api"}
+    return {"status": "healthy", "service": "micro-servicios-api"}
 
-# Handle POST requests to root (common misconfiguration)
+
 @app.post("/")
 async def root_post():
-    logger.warning("POST request received at root path instead of /send-email")
     raise HTTPException(
         status_code=400,
         detail={
@@ -97,36 +192,30 @@ async def root_post():
         }
     )
 
+
 @app.post("/send-email")
 async def send_email(contact_form: ContactForm):
     logger.info(f"Processing email from {contact_form.from_email} for service: {contact_form.service}")
-    
+
     try:
-        # SMTP configuration from environment variables
         smtp_server = os.getenv("SMTP_SERVER", "smtp.ionos.mx")
         smtp_port = int(os.getenv("SMTP_PORT", "465"))
         smtp_username = os.getenv("SMTP_USERNAME", "contacto@micro-servicios.com.mx")
         smtp_password = os.getenv("SMTP_PASSWORD")
         recipient_email = os.getenv("RECIPIENT_EMAIL", "contacto@micro-servicios.com.mx")
-        
-        # Validate required environment variables
+
         if not smtp_password:
             raise ValueError("SMTP_PASSWORD environment variable is required")
-        
-        logger.info(f"Initializing SMTP client with server: {smtp_server}:{smtp_port}")
-        
-        # Initialize SMTP client
+
         email_client = SMTPEmailSender(
             smtp_server=smtp_server,
             port=smtp_port,
             username=smtp_username,
             password=smtp_password
         )
-        
-        # Create email subject
+
         subject = f"Nuevo contacto desde Micro-Servicios - {contact_form.service}"
-        
-        # Create HTML email body
+
         html_body = f"""
         <html>
             <body>
@@ -153,25 +242,21 @@ async def send_email(contact_form: ContactForm):
             </body>
         </html>
         """
-        
-        # Create plain text version as fallback
+
         text_body = f"""
         Nuevo mensaje de contacto desde el sitio web:
-        
+
         Nombre: {contact_form.from_name}
         Email: {contact_form.from_email}
         Servicio de interés: {contact_form.service}
-        
+
         Mensaje:
         {contact_form.message}
-        
+
         ---
         Este mensaje fue enviado desde el formulario de contacto del sitio web Micro-Servicios.
         """
-        
-        logger.info(f"Sending email to {recipient_email}")
-        
-        # Send email using SMTP
+
         result = email_client.send_html_email(
             to_email=recipient_email,
             subject=subject,
@@ -179,20 +264,16 @@ async def send_email(contact_form: ContactForm):
             text_body=text_body,
             from_email=smtp_username
         )
-        
-        logger.info(f"Email sent successfully via SMTP")
-        
-        return {
-            "message": "Email enviado exitosamente",
-            "status": "success"
-        }
-        
+
+        return {"message": "Email enviado exitosamente", "status": "success"}
+
     except Exception as e:
         logger.error(f"Error sending email: {str(e)}")
         raise HTTPException(
-            status_code=500, 
+            status_code=500,
             detail=f"Error al enviar email: {str(e)}"
         )
+
 
 if __name__ == "__main__":
     import uvicorn
