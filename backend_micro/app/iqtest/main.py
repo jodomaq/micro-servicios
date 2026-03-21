@@ -14,11 +14,22 @@ from .database import SessionLocal, init_db
 logger = logging.getLogger("app")
 app = FastAPI(title="IQ Test API")
 
-# Configuración de CORS para permitir peticiones desde el frontend
-frontend_origin = os.getenv("IQ_FRONTEND_ORIGIN", "http://localhost:5173")
+# Configuración de CORS — lee orígenes compartidos o el específico de IQ
+_default_origins = "http://localhost:5173,http://localhost:5174,http://localhost:5175,http://localhost:5176,http://localhost:5177"
+_cors_env = (
+    os.getenv("IQ_FRONTEND_ORIGIN")
+    or os.getenv("EP_CORS_ORIGINS")
+    or _default_origins
+)
+_allowed_origins = [o.strip() for o in _cors_env.split(",") if o.strip()]
+# Agregar siempre el dominio de producción si está definido
+_prod = "https://micro-servicios.com.mx"
+if _prod not in _allowed_origins:
+    _allowed_origins.append(_prod)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[frontend_origin],  # Restringido para producción
+    allow_origins=_allowed_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PATCH"],
     allow_headers=["Authorization", "Content-Type"],

@@ -1,7 +1,20 @@
+"""
+converter_ai_full.py — Conversión IA completa de estados de cuenta PDF → Excel
+
+Estrategia:
+  1. Gemini (si GEMINI_API_KEY disponible): envía el PDF visualmente, máxima fidelidad.
+  2. OpenRouter/Claude (fallback): texto extraído con posiciones X preservadas mediante
+     reconstrucción columnar, eliminando la ambigüedad Cargos/Abonos.
+
+Bug histórico corregido: extract_text() colapsaba las columnas numéricas y el modelo
+no podía distinguir Cargo de Abono. Ahora se usa extract_words() + agrupamiento por Y
+para reconstruir cada fila con alineación X fija (~80 chars por línea).
+"""
 import os
 import json
 import logging
-from typing import List, Dict, Any, Optional
+from collections import defaultdict
+from typing import List, Dict, Any, Optional, Tuple
 
 import pandas as pd
 
@@ -9,33 +22,23 @@ from .converter import _write_excel
 
 logger = logging.getLogger("converter_ai_full")
 
-
-#ALLOWED_COLUMNS = [
-#    "Fecha de Operacion", "Fecha de Cargo", "Fecha de Liquidacion",
-#    "Descripcion", "Referencia", "Categoria", "Cargos", "Abonos",
-#    "Operacion", "Liquidacion", "Monto",
-#]
-
-
 ALLOWED_COLUMNS = [
     "Fecha de Operacion", "Descripcion", "Referencia",
     "Categoria", "Cargos", "Abonos", "Monto",
 ]
-
-
 MANDATORY_COLUMNS = {"Categoria"}
 
+# ─────────────────────────────────────────────
+# Helpers de normalización
+# ─────────────────────────────────────────────
 
 def _strip_markdown_json(text: str) -> str:
-    """Remove markdown code block formatting from JSON responses."""
     text = text.strip()
-    # Remove ```json at the start
-    if text.startswith('```json'):
-        text = text[7:]
-    elif text.startswith('```'):
-        text = text[3:]
-    # Remove ``` at the end
-    if text.endswith('```'):
+    for prefix in ("```json", "```"):
+        if text.startswith(prefix):
+            text = text[len(prefix):]
+            break
+    if text.endswith("```"):
         text = text[:-3]
     return text.strip()
 
@@ -46,28 +49,23 @@ def _normalize_amount(val: Any) -> Optional[float]:
     s = str(val).strip()
     if not s:
         return None
-    neg = False
-    if s.startswith('(') and s.endswith(')'):
-        neg = True
+    neg = s.startswith("(") and s.endswith(")")
+    if neg:
         s = s[1:-1]
-    s = s.replace(' ', '')
-    # Reemplazar separadores: si hay más de un punto/coma, asumir miles
-    # Preferimos dejar solo el último separador decimal
-    if s.count(',') > 1 or (s.count(',') == 1 and s.count('.') >= 1):
-        s = s.replace('.', '').replace(',', '.')
-    else:
-        # Si solo hay comas, convertir a punto
-        if s.count(',') == 1 and s.count('.') == 0:
-            s = s.replace(',', '.')
-        # Remover separadores de miles comunes
-        if s.count('.') > 1:
-            parts = s.split('.')
-            s = ''.join(parts[:-1]) + '.' + parts[-1]
+    s = s.replace(" ", "").replace("$", "")
+    # Detectar separadores de miles vs decimal
+    if s.count(",") > 1 or (s.count(",") == 1 and s.count(".") >= 1):
+        # Coma = miles, punto = decimal  →  1,234.56
+        s = s.replace(",", "")
+    elif s.count(".") > 1:
+        # Punto = miles, coma = decimal  →  1.234,56
+        s = s.replace(".", "").replace(",", ".")
+    elif s.count(",") == 1 and s.count(".") == 0:
+        # Solo coma: puede ser decimal  →  1234,56
+        s = s.replace(",", ".")
     try:
         num = float(s)
-        if neg:
-            num *= -1
-        return num
+        return -num if neg else num
     except Exception:
         return None
 
@@ -81,151 +79,282 @@ def _normalize_date(val: Any) -> Optional[str]:
     try:
         from dateutil import parser as dateparser  # type: ignore
         dt = dateparser.parse(s, dayfirst=True, fuzzy=True)
-        return dt.strftime('%Y-%m-%d')
+        return dt.strftime("%Y-%m-%d")
     except Exception:
         return None
 
 
-def _post_process_dataframe(df: pd.DataFrame) -> pd.DataFrame:
-    df = df.copy()
-    # Normalizar montos y cargos/abonos
-    if 'Cargos' in df.columns:
-        df['Cargos_norm'] = df['Cargos'].apply(_normalize_amount)
-    else:
-        df['Cargos_norm'] = None
-    if 'Abonos' in df.columns:
-        df['Abonos_norm'] = df['Abonos'].apply(_normalize_amount)
-    else:
-        df['Abonos_norm'] = None
-    if 'Monto' in df.columns:
-        df['Monto_norm'] = df['Monto'].apply(_normalize_amount)
-    else:
-        df['Monto_norm'] = None
+# ─────────────────────────────────────────────
+# Extracción espacial de texto
+# ─────────────────────────────────────────────
 
-    # Recalcular Monto si ambos Cargos/Abonos están y Monto vacío
-    if 'Monto' in df.columns:
-        for i, r in df.iterrows():
-            if (pd.isna(r.get('Monto')) or r.get('Monto') in {None, ''}) and (r.get('Cargos_norm') is not None or r.get('Abonos_norm') is not None):
-                c = r.get('Cargos_norm') or 0.0
-                a = r.get('Abonos_norm') or 0.0
-                df.at[i, 'Monto'] = a - c
-            else:
-                if r.get('Monto_norm') is not None:
-                    df.at[i, 'Monto'] = r.get('Monto_norm')
+def _page_to_columnar_text(page, chars_per_line: int = 90) -> str:
+    """Reconstruye el texto de una página preservando la alineación de columnas.
 
-    # Normalizar fechas
-    for col in ['Fecha de Operacion', 'Fecha de Cargo', 'Fecha de Liquidacion']:
-        if col in df.columns:
-            df[col] = df[col].apply(_normalize_date)
+    Usa `extract_words()` para obtener cada palabra con su posición X.
+    Agrupa palabras por fila (Y cercano) y las coloca en posiciones de carácter
+    proporcionales al ancho de la página.  El resultado es texto con espaciado
+    fijo que el modelo puede leer como una tabla ASCII.
 
-    # Limpiar columnas auxiliares
-    for aux in ['Cargos_norm', 'Abonos_norm', 'Monto_norm']:
-        if aux in df.columns:
-            df.drop(columns=[aux], inplace=True)
+    Ejemplo de salida:
+        Fecha       Descripción               Cargos      Abonos     Saldo
+        15/01       Compra Amazon           1,500.00                8,500.00
+        16/01       Depósito nómina                    5,000.00    13,500.00
 
-    if 'Categoria' in df.columns:
-        df['Categoria'] = df['Categoria'].apply(
-            lambda v: str(v).strip().lower() if v not in {None, ''} else None
-        )
-    else:
-        df['Categoria'] = None
-    df['Categoria'] = df['Categoria'].fillna('sin categoria')
-    return df
-
-
-def _drop_empty_columns(df: pd.DataFrame, keep: Optional[set] = None) -> pd.DataFrame:
-    keep = keep or set()
-    cols_to_drop: List[str] = []
-    for col in df.columns:
-        if col in keep:
-            continue
-        series = df[col]
-        if series.dtype == object:
-            if series.fillna('').apply(lambda x: str(x).strip()).eq('').all():
-                cols_to_drop.append(col)
-        else:
-            if series.isna().all():
-                cols_to_drop.append(col)
-    if cols_to_drop:
-        df = df.drop(columns=cols_to_drop)
-    return df
-
-def _call_gemini_full_pdf(pdf_path: str, model: Optional[str] = None, max_retries: int = 2) -> List[Dict[str, Any]]:
-    """Sube el PDF completo a Gemini y solicita extracción en JSON estricto.
-
-    Usa el endpoint chat.completions con referencia directa al archivo.
+    Con esto el modelo puede inferir que 1,500.00 está en la columna Cargos
+    (misma X que el encabezado "Cargos") y 5,000.00 en Abonos.
     """
+    try:
+        words = page.extract_words(
+            x_tolerance=3,
+            y_tolerance=3,
+            keep_blank_chars=False,
+            extra_attrs=["fontname", "size"],
+        )
+    except Exception:
+        words = page.extract_words(x_tolerance=3, y_tolerance=3, keep_blank_chars=False)
+
+    if not words:
+        return page.extract_text(x_tolerance=2, y_tolerance=2) or ""
+
+    if len(words) < 5:
+        # Muy pocas palabras — usar extracción plana para no perder contexto
+        logger.debug("Página con %d palabras, usando extract_text como fallback", len(words))
+        return page.extract_text(x_tolerance=2, y_tolerance=2) or ""
+
+    page_width: float = float(page.width) if page.width else 600.0
+    char_w: float = page_width / chars_per_line  # puntos por carácter
+
+    # Agrupar por fila: round(top / y_tol) * y_tol con tolerancia de 4pt
+    Y_TOL = 4.0
+    rows: Dict[int, List[dict]] = defaultdict(list)
+    for w in words:
+        key = int(round(w["top"] / Y_TOL))
+        rows[key].append(w)
+
+    lines: List[str] = []
+    for key in sorted(rows.keys()):
+        row_words = sorted(rows[key], key=lambda w: w["x0"])
+        buf = [" "] * chars_per_line
+        for w in row_words:
+            col = int(w["x0"] / char_w)
+            col = max(0, min(col, chars_per_line - 1))
+            text = w["text"]
+            end = min(col + len(text), chars_per_line)
+            for i, ch in enumerate(text[: end - col]):
+                buf[col + i] = ch
+        line = "".join(buf).rstrip()
+        if line.strip():
+            lines.append(line)
+
+    return "\n".join(lines)
+
+
+def _extract_pages_columnar(pdf_path: str, max_pages: int = 10) -> List[Dict[str, Any]]:
+    """Extrae todas las páginas como texto columnar y añade métricas de relevancia."""
+    import re
+
+    try:
+        import pdfplumber  # type: ignore
+    except Exception as e:
+        raise RuntimeError(f"pdfplumber no disponible: {e}")
+
+    date_re = re.compile(r"\b\d{1,2}[/\-](?:\d{1,2}|[A-Za-z]{3,})")
+    amount_re = re.compile(r"\d{1,3}(?:[,\.]\d{3})*(?:[,\.]\d{2})\b")
+
+    pages: List[Dict[str, Any]] = []
+    with pdfplumber.open(pdf_path) as pdf:
+        for idx, page in enumerate(pdf.pages[:max_pages], start=1):
+            txt = _page_to_columnar_text(page)
+            date_hits = len(date_re.findall(txt))
+            amount_hits = len(amount_re.findall(txt))
+            pages.append({
+                "page": idx,
+                "text": txt,
+                "date_hits": date_hits,
+                "amount_hits": amount_hits,
+            })
+
+    return pages
+
+
+# ─────────────────────────────────────────────
+# Prompt del modelo
+# ─────────────────────────────────────────────
+
+_SYSTEM_PROMPT = """\
+Eres un analista experto de estados de cuenta bancarios mexicanos.
+
+CONTEXTO DEL TEXTO QUE RECIBES:
+El texto ha sido reconstruido preservando la posición X de cada palabra, usando ~90 \
+caracteres de ancho. Esto significa que la alineación horizontal SIGUE siendo válida:
+- Palabras que aparecen en la misma columna X a lo largo de varias filas pertenecen \
+a la misma columna de la tabla.
+- Los encabezados del estado de cuenta (Cargos, Abonos, Debe, Haber, Retiros, \
+Depósitos, etc.) te indican qué columna es cuál.
+
+REGLAS DE EXTRACCIÓN (obligatorias):
+1. Lee primero la fila de encabezados para saber en qué columna está cada concepto.
+2. Para cada movimiento, asigna el importe a "Cargos" o "Abonos" según la columna \
+del encabezado correspondiente, NO según el orden de aparición.
+3. Un mismo movimiento NUNCA tiene valor en Cargos Y en Abonos al mismo tiempo.
+4. Cargos = débitos, gastos, retiros (reducen el saldo).
+   Abonos = créditos, depósitos, ingresos (aumentan el saldo).
+5. Si el estado usa "Debe/Haber", "Retiros/Depósitos", "Débito/Crédito" o \
+"Cargo/Abono" — mapea correctamente: Debe/Retiro/Débito/Cargo → Cargos; \
+Haber/Depósito/Crédito/Abono → Abonos.
+6. Monto = Abonos - Cargos (resultado negativo si fue un gasto, positivo si ingreso).
+7. Ignora encabezados de página, totales generales, publicidad, datos del titular.
+8. No inventes transacciones.
+9. Categoria: clasifica en minúsculas (despensa, alimentos, servicios, transferencias,\
+ retiros, combustible, entretenimiento, salud, otros).
+
+FORMATO DE SALIDA:
+{"rows": [{"Fecha de Operacion": "...", "Descripcion": "...", "Referencia": "...",\
+ "Categoria": "...", "Cargos": 0.0 o null, "Abonos": 0.0 o null, "Monto": 0.0}, ...]}
+
+Devuelve ÚNICAMENTE JSON válido. Nada fuera del JSON.
+"""
+
+_USER_TEMPLATE = """\
+Analiza las siguientes páginas del estado de cuenta.
+Extrae TODOS los movimientos que encuentres usando las instrucciones del sistema.
+Devuelve SOLO JSON con la clave "rows".
+
+{pages_json}
+"""
+
+
+# ─────────────────────────────────────────────
+# Llamada a OpenRouter (Claude / texto)
+# ─────────────────────────────────────────────
+
+def _call_openrouter(
+    pages: List[Dict[str, Any]],
+    model: Optional[str] = None,
+) -> List[Dict[str, Any]]:
+    api_key = os.getenv("OPENROUTER_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENROUTER_API_KEY no está configurado.")
+
+    model = model or os.getenv("OPENAI_FULL_MODEL", "anthropic/claude-sonnet-4-5")
+
+    try:
+        from openai import OpenAI  # type: ignore
+    except Exception as e:
+        raise RuntimeError(f"No se pudo importar OpenAI SDK: {e}")
+
+    client = OpenAI(
+        api_key=api_key,
+        base_url="https://openrouter.ai/api/v1",
+        default_headers={
+            "HTTP-Referer": "https://micro-servicios.com.mx",
+            "X-Title": "Bank Statement Converter",
+        },
+    )
+
+    batch_size = int(os.getenv("FULL_CHAT_PAGES_PER_BATCH", "4"))
+    all_rows: List[Dict[str, Any]] = []
+
+    for i in range(0, len(pages), batch_size):
+        batch = pages[i: i + batch_size]
+        # Limitar a 12 000 chars por página para no sobrepasar tokens
+        pages_payload = [
+            {"page": p["page"], "text": p["text"][:12_000]}
+            for p in batch
+        ]
+        user_content = _USER_TEMPLATE.format(
+            pages_json=json.dumps({"pages": pages_payload}, ensure_ascii=False)
+        )
+        try:
+            resp = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": _SYSTEM_PROMPT},
+                    {"role": "user", "content": user_content},
+                ],
+                temperature=0.05,
+                max_tokens=6_000,
+                timeout=120,  # 2 minutos máximo por batch
+            )
+            raw = resp.choices[0].message.content or ""
+            raw = _strip_markdown_json(raw)
+            data = json.loads(raw)
+            rows = data.get("rows")
+            if not isinstance(rows, list):
+                raise RuntimeError("Respuesta sin 'rows' list.")
+            all_rows.extend(rows)
+            logger.info(
+                "OpenRouter batch p%s–p%s → %d filas",
+                batch[0]["page"], batch[-1]["page"], len(rows),
+            )
+        except json.JSONDecodeError as exc:
+            logger.error("JSON inválido del modelo: %s", exc)
+        except Exception as exc:
+            logger.warning("Fallo batch OpenRouter p%s–p%s: %s", batch[0]["page"], batch[-1]["page"], exc)
+
+    return all_rows
+
+
+# ─────────────────────────────────────────────
+# Llamada a Gemini (PDF nativo — máxima fidelidad)
+# ─────────────────────────────────────────────
+
+async def _call_gemini(
+    pdf_path: str,
+    model: Optional[str] = None,
+    max_retries: int = 2,
+) -> List[Dict[str, Any]]:
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         raise RuntimeError("GEMINI_API_KEY no está configurado.")
 
     model = model or os.getenv("GEMINI_FULL_MODEL", "gemini-2.5-flash")
-
-    # Tamaño razonable (evitar subir PDFs enormes que excedan límites típicos ~25MB)
-    size_bytes = os.path.getsize(pdf_path)
     max_mb = float(os.getenv("GEMINI_FULL_MAX_MB", "25"))
-    if size_bytes > max_mb * 1024 * 1024:
-        raise ValueError(f"PDF demasiado grande ({size_bytes/1024/1024:.1f}MB) límite {max_mb}MB")
+    if os.path.getsize(pdf_path) > max_mb * 1024 * 1024:
+        raise ValueError(f"PDF demasiado grande para Gemini (límite {max_mb} MB).")
 
     try:
         import google.generativeai as genai  # type: ignore
     except Exception as e:
-        raise RuntimeError(f"No se pudo importar Google Generative AI SDK: {e}")
+        raise RuntimeError(f"google-generativeai no disponible: {e}")
 
     genai.configure(api_key=api_key)
-    try:
-        uploaded_file = genai.upload_file(path=pdf_path, mime_type="application/pdf")
-    except Exception as e:
-        raise RuntimeError(f"Error subiendo PDF a Gemini: {e}")
 
-    import time
-    gemini_file = uploaded_file
-    for _ in range(int(os.getenv("GEMINI_FILE_POLLING_RETRIES", "30"))):
-        file_state = getattr(genai.get_file(uploaded_file.name), "state", None)
-        status = getattr(file_state, "name", None)
+    import asyncio, time
+
+    # Subir el PDF en un executor para no bloquear el event loop
+    loop = asyncio.get_event_loop()
+    uploaded = await loop.run_in_executor(
+        None, lambda: genai.upload_file(path=pdf_path, mime_type="application/pdf")
+    )
+
+    poll_retries = int(os.getenv("GEMINI_FILE_POLLING_RETRIES", "30"))
+    poll_sleep = float(os.getenv("GEMINI_FILE_POLLING_SLEEP", "2"))
+    gemini_file = uploaded
+    for _ in range(poll_retries):
+        current = await loop.run_in_executor(None, lambda: genai.get_file(uploaded.name))
+        state = getattr(current, "state", None)
+        status = getattr(state, "name", "")
         if status == "ACTIVE":
-            gemini_file = genai.get_file(uploaded_file.name)
+            gemini_file = current
             break
         if status == "FAILED":
-            raise RuntimeError("Gemini marcó el PDF como fallido.")
-        time.sleep(float(os.getenv("GEMINI_FILE_POLLING_SLEEP", "2")))
+            raise RuntimeError("Gemini marcó el PDF como FAILED.")
+        await asyncio.sleep(poll_sleep)  # no-blocking
     else:
-        raise RuntimeError("Timeout esperando que Gemini procese el PDF.")
+        raise RuntimeError("Timeout esperando procesamiento de Gemini.")
 
-    system_instructions = (
-        "Eres un analista experto de estados de cuenta bancarios. Recibes un archivo PDF completo. "
-        "Debes extraer únicamente las transacciones/movimientos reales en JSON estricto.\n"
-    )
-    system_instructions += (
-        "Formato de salida: {\"rows\":[ ... ]}\n"
-        "Cada objeto en rows puede incluir estas claves (usa null si no aplica y NO agregues otras):\n"
-        + ", ".join(ALLOWED_COLUMNS) + "\n"
-        "Reglas adicionales:\n"
-        "- No inventes filas.\n"
-        "- Ignora encabezados, totales generales repetidos, publicidad, notas legales.\n"
-        "- Incluye solo los movimientos del periodo, ignora otras tablas o resúmenes.\n"
-        "- Pon especial atención en las columnas y su alineación en el documento, ya que se podría confundir cargos con abonos.\n"
-        "- Si existen Cargos y Abonos, calcula Monto = Abonos - Cargos (negativo si corresponde).\n"
-        "- Si solo hay un importe claro úsalo como Monto respetando signo (paréntesis = negativo).\n"
-        "- Normaliza comas/puntos a float estándar (usa punto decimal).\n"
-        "- Fechas: intenta formato ISO YYYY-MM-DD; si ambiguo, deja null.\n"
-        "- Referencia: valores alfanuméricos asociados a la operación (si no existe, null).\n"
-        "- Categoria: clasifica el movimiento en categorías simples en minúsculas (ej. despensa, servicios, diversion, alimentos, combustible, transferencias, retiros, otros).\n"
-    )
+    mc = genai.GenerativeModel(model_name=model, system_instruction=_SYSTEM_PROMPT)
     user_prompt = (
-        "Extrae los movimientos del PDF adjunto y devuelve SOLO JSON válido con la clave 'rows'. "
-        "No escribas nada fuera del JSON.\n"
-        "Incluye la columna 'Categoria' para cada fila con la mejor clasificación posible (usa 'otros' si no estás seguro).\n"
-        "El archivo PDF está adjunto."
+        "Extrae los movimientos del PDF adjunto y devuelve SOLO JSON con la clave 'rows'.\n"
+        "Recuerda: usa la posición visual de las columnas para distinguir Cargos de Abonos."
     )
-    model_client = genai.GenerativeModel(
-        model_name=model,
-        system_instruction=system_instructions,
-    )
-    upload_last_error: Optional[Exception] = None
+
+    last_err: Optional[Exception] = None
     for attempt in range(1, max_retries + 1):
         try:
-            response = model_client.generate_content(
+            resp = mc.generate_content(
                 [
                     {"text": user_prompt},
                     {
@@ -237,215 +366,164 @@ def _call_gemini_full_pdf(pdf_path: str, model: Optional[str] = None, max_retrie
                 ],
                 generation_config={"response_mime_type": "application/json"},
             )
-            raw = (response.text or "").strip()
-            raw = _strip_markdown_json(raw)
+            raw = _strip_markdown_json(resp.text or "")
             data = json.loads(raw)
             rows = data.get("rows")
             if not isinstance(rows, list):
-                raise RuntimeError("La respuesta JSON no contiene 'rows' list.")
+                raise RuntimeError("Respuesta sin 'rows' list.")
+            logger.info("Gemini extrajo %d filas (intento %d)", len(rows), attempt)
             return rows
-        except Exception as e:
-            upload_last_error = e
-            logger.warning("Intento %s extracción IA (Gemini) falló: %s", attempt, e)
+        except Exception as exc:
+            last_err = exc
+            logger.warning("Intento Gemini %d falló: %s", attempt, exc)
 
-    try:
-        import pdfplumber  # type: ignore
-    except Exception as e:
-        raise RuntimeError(
-            "Extracción IA (Gemini) falló y pdfplumber necesario para fallback: "
-            f"{e}. Último error Gemini={upload_last_error}"
-        )
-    pages_text: List[str] = []
-    with pdfplumber.open(pdf_path) as pdf:
-        for pg in pdf.pages:
-            txt = pg.extract_text(x_tolerance=2, y_tolerance=2) or ""
-            pages_text.append(txt)
-    batch_size = int(os.getenv("FULL_CHAT_PAGES_PER_BATCH", "5"))
-
-    def call_batch(pages_slice: List[str]) -> List[Dict[str, Any]]:
-        prompt_obj = {
-            "instrucciones": user_prompt,
-            "pages": [
-                {"page": i + 1, "text": t[:15000]}
-                for i, t in enumerate(pages_slice)
-            ],
-        }
-        try:
-            response = model_client.generate_content(
-                [{"text": json.dumps(prompt_obj, ensure_ascii=False)}],
-                generation_config={"response_mime_type": "application/json"},
-            )
-            raw = (response.text or "").strip()
-            raw = _strip_markdown_json(raw)
-            data = json.loads(raw)
-            rows = data.get("rows")
-            if not isinstance(rows, list):
-                raise RuntimeError("Respuesta sin 'rows'.")
-            if os.getenv("FULL_DEBUG"):
-                logger.info("DEBUG batch rows=%s", len(rows))
-            return rows
-        except Exception as e:
-            logger.warning("Falló batch Gemini fallback: %s", e)
-            return []
-
-    all_rows: List[Dict[str, Any]] = []
-    current: List[str] = []
-    for txt in pages_text:
-        current.append(txt)
-        if len(current) >= batch_size:
-            all_rows.extend(call_batch(current))
-            current = []
-    if current:
-        all_rows.extend(call_batch(current))
-
-    if not all_rows:
-        raise RuntimeError(
-            "Extracción IA (Gemini) falló definitivamente o fallback no devolvió filas. "
-            f"Último error Gemini={upload_last_error}"
-        )
-    return all_rows
+    raise RuntimeError(f"Gemini falló tras {max_retries} intentos. Último error: {last_err}")
 
 
-def _call_openai_full_pdf(pdf_path: str, model: Optional[str] = None, max_retries: int = 2) -> List[Dict[str, Any]]:
-    """Sube el PDF completo a OpenRouter y solicita extracción en JSON estricto.
+# ─────────────────────────────────────────────
+# Post-procesado y validación
+# ─────────────────────────────────────────────
 
-    Usa el endpoint chat.completions con texto extraído del PDF.
+def _post_process_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+
+    # Normalizar importes
+    for col in ("Cargos", "Abonos", "Monto"):
+        if col in df.columns:
+            df[col] = df[col].apply(_normalize_amount)
+
+    # Recalcular Monto cuando falte o sea 0 y hay Cargos/Abonos
+    if "Monto" in df.columns:
+        for i, r in df.iterrows():
+            m = r.get("Monto")
+            c = r.get("Cargos") or 0.0
+            a = r.get("Abonos") or 0.0
+            if (m is None or (isinstance(m, float) and pd.isna(m))) and (c or a):
+                df.at[i, "Monto"] = (a or 0.0) - (c or 0.0)
+
+    # Normalizar fechas
+    if "Fecha de Operacion" in df.columns:
+        df["Fecha de Operacion"] = df["Fecha de Operacion"].apply(_normalize_date)
+
+    # Categoría siempre presente y en minúsculas
+    if "Categoria" not in df.columns:
+        df["Categoria"] = "sin categoria"
+    df["Categoria"] = df["Categoria"].apply(
+        lambda v: str(v).strip().lower() if v not in (None, "", float("nan")) else "sin categoria"
+    )
+
+    return df
+
+
+def _sanity_check_cargo_abono(df: pd.DataFrame) -> pd.DataFrame:
+    """Heurística: si 'Cargos' tiene importes que parecen ingresos (muy altos,
+    redondos) y 'Abonos' parece gastos (importes bajos variados), las columnas
+    están invertidas.  Detectar y corregir automáticamente.
+
+    Señal de inversión: la mediana de Cargos > mediana de Abonos * 5 cuando
+    ambas columnas tienen suficientes filas. En un estado de cuenta normal los
+    cargos individuales son menores o iguales a los abonos (nómina suele ser
+    el mayor abono; gastos diarios son múltiples cargos pequeños).
     """
-    api_key = os.getenv("OPENROUTER_API_KEY")
-    if not api_key:
-        raise RuntimeError("OPENROUTER_API_KEY no está configurado.")
+    if "Cargos" not in df.columns or "Abonos" not in df.columns:
+        return df
 
-    model = model or os.getenv("OPENAI_FULL_MODEL", "anthropic/claude-sonnet-4.5")
+    cargos = df["Cargos"].dropna()
+    abonos = df["Abonos"].dropna()
 
-    # Tamaño razonable (evitar subir PDFs enormes que excedan límites típicos ~25MB)
-    size_bytes = os.path.getsize(pdf_path)
-    max_mb = float(os.getenv("OPENAI_FULL_MAX_MB", "25"))
-    if size_bytes > max_mb * 1024 * 1024:
-        raise ValueError(f"PDF demasiado grande ({size_bytes/1024/1024:.1f}MB) límite {max_mb}MB")
+    if len(cargos) < 3 or len(abonos) < 3:
+        return df  # Pocos datos, no concluyente
 
-    try:
-        from openai import OpenAI  # type: ignore
-    except Exception as e:
-        raise RuntimeError(f"No se pudo importar OpenAI SDK: {e}")
+    median_c = cargos.median()
+    median_a = abonos.median()
 
-    client = OpenAI(
-        api_key=api_key,
-        base_url="https://openrouter.ai/api/v1",
-        default_headers={
-            "HTTP-Referer": "https://github.com/your-org/backend_micro",
-            "X-Title": "Bank Statement Converter"
-        }
-    )
+    # Si la mediana de cargos es 5x mayor que la de abonos, sospechamos inversión
+    if median_c > 0 and median_a > 0 and median_c > median_a * 5:
+        logger.warning(
+            "Posible inversión Cargos/Abonos detectada "
+            "(median_cargos=%.2f >> median_abonos=%.2f). Intercambiando columnas.",
+            median_c, median_a,
+        )
+        df = df.copy()
+        df["Cargos"], df["Abonos"] = df["Abonos"].copy(), df["Cargos"].copy()
+        # Recalcular Monto
+        df["Monto"] = df.apply(
+            lambda r: (r.get("Abonos") or 0.0) - (r.get("Cargos") or 0.0), axis=1
+        )
 
-    # Preparar instrucciones
-    system_instructions = (
-        "Eres un analista experto de estados de cuenta bancarios. Recibes un archivo PDF completo. "
-        "Debes extraer únicamente las transacciones/movimientos reales en JSON estricto.\n"
-        "Formato de salida: {\"rows\":[ ... ]}\n"
-        "Cada objeto en rows puede incluir estas claves (usa null si no aplica y NO agregues otras):\n"
-        + ", ".join(ALLOWED_COLUMNS) + "\n"
-        "Reglas adicionales:\n"
-        "- No inventes filas.\n"
-        "- Ignora encabezados, totales generales repetidos, publicidad, notas legales.\n"
-        "- Incluye solo los movimientos del periodo, ignora otras tablas o resúmenes.\n"
-        "- Pon especial atención en las columnas y su alineación en el documento, ya que se podría confundir cargos con abonos.\n"
-        "- Si existen Cargos y Abonos, calcula Monto = Abonos - Cargos (negativo si corresponde).\n"
-        "- Si solo hay un importe claro úsalo como Monto respetando signo (paréntesis = negativo).\n"
-        "- Normaliza comas/puntos a float estándar (usa punto decimal).\n"
-        "- Fechas: intenta formato ISO YYYY-MM-DD; si ambiguo, deja null.\n"
-        "- Referencia: valores alfanuméricos asociados a la operación (si no existe, null).\n"
-        "- Categoria: clasifica el movimiento en categorías simples en minúsculas (ej. despensa, servicios, diversion, alimentos, combustible, transferencias, retiros, otros).\n"
-    )
+    return df
 
-    user_prompt = (
-        "Extrae los movimientos del PDF adjunto y devuelve SOLO JSON válido con la clave 'rows'. "
-        "No escribas nada fuera del JSON. "
-        "Incluye la columna 'Categoria' en cada fila utilizando la mejor clasificación posible (usa 'otros' si no estás seguro)."
-    )
 
-    # OpenRouter/Claude no soporta subida directa de archivos, usamos texto extraído
-    try:
-        import pdfplumber  # type: ignore
-    except Exception as e:
-        raise RuntimeError(f"pdfplumber necesario para extracción: {e}")
+def _drop_empty_columns(df: pd.DataFrame, keep: Optional[set] = None) -> pd.DataFrame:
+    keep = keep or set()
+    cols_to_drop = [
+        col for col in df.columns
+        if col not in keep
+        and (
+            (df[col].dtype == object and df[col].fillna("").apply(str.strip).eq("").all())
+            or (df[col].dtype != object and df[col].isna().all())
+        )
+    ]
+    return df.drop(columns=cols_to_drop) if cols_to_drop else df
 
-    pages_text: List[str] = []
-    with pdfplumber.open(pdf_path) as pdf:
-        for pg in pdf.pages:
-            txt = pg.extract_text(x_tolerance=2, y_tolerance=2) or ""
-            pages_text.append(txt)
 
-    # Dividir en lotes para evitar límites de tokens
-    batch_size = int(os.getenv("FULL_CHAT_PAGES_PER_BATCH", "5"))
+# ─────────────────────────────────────────────
+# Punto de entrada principal
+# ─────────────────────────────────────────────
 
-    def call_batch(pages_slice: List[str]) -> List[Dict[str, Any]]:
-        prompt_obj = {
-            "instrucciones": user_prompt,
-            "pages": [
-                {"page": i + 1, "text": t[:15000]}
-                for i, t in enumerate(pages_slice)
-            ]
-        }
+async def convert_pdf_to_excel_ai_full(pdf_path: str, model: Optional[str] = None) -> bytes:
+    """Conversión IA completa (async).
+
+    Orden de estrategias:
+    1. Gemini (nativo PDF, visión) — si GEMINI_API_KEY está definida.
+    2. OpenRouter/Claude con texto columnar — fallback siempre disponible.
+    """
+    rows: List[Dict[str, Any]] = []
+
+    # Estrategia 1: Gemini nativo (ve el PDF como documento visual)
+    prefer_gemini = os.getenv("GEMINI_API_KEY") and os.getenv("CONVERTER_PREFER_GEMINI", "1") not in ("0", "false", "no")
+    if prefer_gemini:
         try:
-            resp = client.chat.completions.create(
-                model=model,
-                messages=[
-                    {"role": "system", "content": system_instructions},
-                    {"role": "user", "content": json.dumps(prompt_obj, ensure_ascii=False)},
-                ],
-                temperature=0.1,
-                max_tokens=4000,
-            )
-            raw = resp.choices[0].message.content
-            
-            logger.debug("OpenRouter response: %s", raw[:500] if raw else "EMPTY")
-            
-            if not raw or raw.strip() == "":
-                raise RuntimeError("OpenRouter devolvió respuesta vacía")
-            
-            raw = _strip_markdown_json(raw)
-            data = json.loads(raw)
-            rows = data.get("rows")
-            if not isinstance(rows, list):
-                logger.error("Payload sin 'rows': %s", data)
-                raise RuntimeError("Respuesta sin 'rows'.")
-            if os.getenv("FULL_DEBUG"):
-                logger.info("DEBUG batch rows=%s", len(rows))
-            return rows
-        except json.JSONDecodeError as e:
-            logger.error("JSON inválido recibido: %s", raw[:1000] if raw else "EMPTY")
-            raise RuntimeError(f"La respuesta no es JSON válido: {e}")
-        except Exception as e:
-            logger.warning("Falló batch OpenRouter: %s", e)
-            return []
+            rows = await _call_gemini(pdf_path, model=model)
+            logger.info("Conversión exitosa con Gemini (%d filas)", len(rows))
+        except Exception as exc:
+            logger.warning("Gemini falló, usando OpenRouter como fallback: %s", exc)
+            rows = []
 
-    all_rows: List[Dict[str, Any]] = []
-    current: List[str] = []
-    for txt in pages_text:
-        current.append(txt)
-        if len(current) >= batch_size:
-            all_rows.extend(call_batch(current))
-            current = []
-    if current:
-        all_rows.extend(call_batch(current))
+    # Estrategia 2: OpenRouter con texto columnar
+    if not rows:
+        try:
+            pages = _extract_pages_columnar(pdf_path, max_pages=10)
+            # Filtrar páginas sin contenido financiero relevante
+            relevant = [p for p in pages if p["date_hits"] > 0 or p["amount_hits"] > 0]
+            if not relevant:
+                relevant = pages  # Si ninguna pasa el filtro, usar todas
+            rows = _call_openrouter(relevant, model=model)
+            logger.info("Conversión exitosa con OpenRouter (%d filas)", len(rows))
+        except Exception as exc:
+            logger.error("OpenRouter también falló: %s", exc)
+            raise RuntimeError(
+                f"La conversión IA falló en todas las estrategias disponibles: {exc}"
+            ) from exc
 
-    if not all_rows:
-        raise RuntimeError("OpenRouter no devolvió filas válidas.")
-    return all_rows
+    if not rows:
+        raise ValueError(
+            "El modelo no devolvió movimientos. Verifica que el PDF contenga "
+            "transacciones en formato tabular."
+        )
 
-
-def convert_pdf_to_excel_ai_full(pdf_path: str, model: Optional[str] = None) -> bytes:
-    """Conversión FULL IA: envía el PDF completo al modelo (alto costo / máxima fidelidad)."""
-    rows = _call_openai_full_pdf(pdf_path, model=model)
-    # rows = _call_gemini_full_pdf(pdf_path, model=model)  # Mantener Gemini como alternativa
+    # Construir DataFrame
     df = pd.DataFrame(rows)
-    # Asegurar columnas y orden
     for c in ALLOWED_COLUMNS:
         if c not in df.columns:
             df[c] = None
     df = df[ALLOWED_COLUMNS]
+
+    # Post-procesado
     df = _post_process_dataframe(df)
+    df = _sanity_check_cargo_abono(df)
     df = _drop_empty_columns(df, keep=MANDATORY_COLUMNS)
+
     return _write_excel(df)
 
 

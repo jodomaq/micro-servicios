@@ -1,61 +1,443 @@
-:root{--bg:#0e0f13;--card:#151822;--text:#e8eaf1;--muted:#a7b0c0;--primary:#4f8cff;--success:#6ee7b7;--error:#fca5a5;--warning:#fbbf24}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial}
-.container{max-width:1200px;margin:0 auto;padding:28px}
-.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
-.header-actions{display:flex;gap:12px}
-.card{background:var(--card);border-radius:16px;padding:24px;border:1px solid #24283b}
-.btn{background:var(--primary);color:#fff;border:none;padding:12px 16px;border-radius:10px;font-weight:600;cursor:pointer;transition:all 0.2s}
-.btn:hover{opacity:0.9;transform:translateY(-1px)}
-.btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
-.btn-secondary{background:#374151}
-.btn-success{background:#10b981}
-.btn-danger{background:#ef4444}
-.btn-primary{background:var(--primary)}
-.input{background:#0c0f16;border:1px dashed #2b3350;border-radius:12px;padding:18px;color:var(--muted)}
-.row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-.footer{opacity:.8;margin-top:20px;font-size:12px;text-align:center}
-.user-greeting{color:var(--success);font-weight:600}
-hr{border:0;border-top:1px solid #24283b;margin:18px 0}
-.success{color:var(--success)}
-.error{color:var(--error)}
+/*
+ * Excel Converter — estilos específicos de la app
+ * Los tokens de color, tipografía y espaciado vienen de shared-ui/tokens.css
+ */
 
-/* Login Section */
-.login-section{background:var(--card);border-radius:12px;padding:20px;margin-bottom:20px;text-align:center;border:1px solid #24283b}
-#googleSignInButton{display:inline-block;margin-top:12px}
+/* ========================
+   Overrides globales
+======================== */
+body {
+  background: var(--ms-bg-dark);
+  color: var(--ms-text-light);
+  font-family: var(--ms-font);
+  line-height: 1.6;
+}
 
-/* Dashboard */
-.dashboard{display:flex;flex-direction:column;gap:24px}
-.user-info{display:flex;justify-content:space-between;align-items:center;padding:20px;background:#1a1f2e;border-radius:12px}
-.user-header{display:flex;align-items:center;gap:12px}
-.user-avatar{width:48px;height:48px;border-radius:50%;border:2px solid var(--primary)}
-.subscription-info,.no-subscription,.stats,.recent-conversions{background:#1a1f2e;padding:20px;border-radius:12px}
-.subscription-details{margin:16px 0}
-.subscription-details p{margin:8px 0}
-.recent-conversions ul{list-style:none;padding:0;margin:12px 0 0}
-.recent-conversions li{display:flex;justify-content:space-between;padding:12px;background:var(--card);margin-bottom:8px;border-radius:8px}
-.dashboard-loading{text-align:center;padding:40px}
+/* ========================
+   Layout principal
+======================== */
+.container {
+  max-width: var(--ms-max-width);
+  margin: 0 auto;
+  padding: var(--ms-space-8) var(--ms-space-6);
+}
 
-/* Subscription Plans */
-.subscription-plans{padding:20px 0}
-.plans-subtitle{text-align:center;color:var(--muted);margin-bottom:32px}
-.plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;margin:24px 0}
-.plan-card{background:#1a1f2e;border-radius:16px;padding:28px;border:2px solid #24283b;transition:all 0.3s;position:relative}
-.plan-card:hover{border-color:var(--primary);transform:translateY(-4px)}
-.plan-card.popular{border-color:var(--primary)}
-.popular-badge{position:absolute;top:-12px;right:20px;background:var(--primary);color:#fff;padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700}
-.plan-card h3{margin:0 0 16px;font-size:24px}
-.plan-price{display:flex;align-items:baseline;gap:8px;margin-bottom:12px}
-.plan-price .price{font-size:48px;font-weight:700;color:var(--primary)}
-.plan-price .currency{color:var(--muted);font-size:16px}
-.plan-conversions{font-size:20px;margin:16px 0;color:var(--success)}
-.plan-description{color:var(--muted);margin:8px 0}
-.plan-features{margin:20px 0;padding:20px 0;border-top:1px solid #24283b;border-bottom:1px solid #24283b}
-.plan-features p{margin:8px 0;color:var(--muted)}
-.price-per-conversion{text-align:center;margin-top:12px;font-size:12px;color:var(--muted)}
-.login-prompt{text-align:center;margin-top:24px;padding:16px;background:#1a1f2e;border-radius:8px;color:var(--warning)}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--ms-space-6);
+  flex-wrap: wrap;
+  gap: var(--ms-space-3);
+}
 
-/* Payment Mode Selector */
-.payment-mode-selector{display:flex;gap:12px;margin:20px 0;justify-content:center}
-.onetime-payment,.subscription-payment{margin-top:24px}
-.subscription-notice{background:#1a1f2e;padding:16px;border-radius:8px;margin:16px 0;border-left:4px solid var(--success)}
+.header h2 {
+  font-size: var(--ms-text-2xl);
+  font-weight: 700;
+  color: var(--ms-text-white);
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--ms-space-3);
+}
+
+/* ========================
+   Botones (mapeo al sistema ms-btn)
+======================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ms-space-2);
+  padding: 0.625rem var(--ms-space-6);
+  font-family: var(--ms-font);
+  font-size: var(--ms-text-sm);
+  font-weight: 600;
+  border-radius: var(--ms-radius-lg);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--ms-ease-fast);
+  white-space: nowrap;
+}
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+.btn:not(:disabled):hover { transform: translateY(-1px); }
+
+.btn-primary {
+  background: var(--ms-gradient-brand);
+  color: var(--ms-text-white);
+  box-shadow: var(--ms-shadow-md);
+}
+.btn-primary:not(:disabled):hover { box-shadow: var(--ms-shadow-glow); }
+
+.btn-secondary {
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--ms-primary-light);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+.btn-secondary:not(:disabled):hover {
+  background: rgba(99, 102, 241, 0.25);
+  border-color: var(--ms-primary);
+}
+
+.btn-success {
+  background: var(--ms-success);
+  color: var(--ms-text-white);
+}
+.btn-success:not(:disabled):hover { filter: brightness(1.1); }
+
+.btn-danger {
+  background: var(--ms-danger);
+  color: var(--ms-text-white);
+}
+.btn-danger:not(:disabled):hover { background: var(--ms-danger-dark); }
+
+/* ========================
+   Card
+======================== */
+.card {
+  background: var(--ms-bg-dark2);
+  border-radius: var(--ms-radius-xl);
+  padding: var(--ms-space-8);
+  border: 1px solid rgba(255,255,255,0.07);
+  transition: border-color var(--ms-ease-fast);
+}
+
+/* ========================
+   Input de archivo
+======================== */
+.input {
+  background: rgba(15,23,42,0.8);
+  border: 2px dashed rgba(99,102,241,0.3);
+  border-radius: var(--ms-radius-lg);
+  padding: var(--ms-space-4);
+  color: var(--ms-text-muted);
+  width: 100%;
+  transition: border-color var(--ms-ease-fast);
+  font-size: var(--ms-text-sm);
+  cursor: pointer;
+}
+.input:hover { border-color: var(--ms-primary); }
+
+/* ========================
+   Row / Flex helpers
+======================== */
+.row {
+  display: flex;
+  gap: var(--ms-space-4);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: var(--ms-space-4);
+}
+
+/* ========================
+   Mensajes de estado
+======================== */
+.success {
+  color: #6ee7b7;
+  font-size: var(--ms-text-sm);
+  font-weight: 500;
+}
+.error {
+  color: #fca5a5;
+  font-size: var(--ms-text-sm);
+  font-weight: 500;
+}
+.status-msg {
+  margin-top: var(--ms-space-3);
+  padding: var(--ms-space-3) var(--ms-space-4);
+  border-radius: var(--ms-radius-md);
+  font-size: var(--ms-text-sm);
+  font-weight: 500;
+}
+.status-msg.success {
+  background: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.3);
+  color: #6ee7b7;
+}
+.status-msg.error {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #fca5a5;
+}
+.status-msg.info {
+  background: rgba(14,165,233,0.1);
+  border: 1px solid rgba(14,165,233,0.3);
+  color: #7dd3fc;
+}
+
+/* ========================
+   Footer
+======================== */
+.footer {
+  opacity: .7;
+  margin-top: var(--ms-space-6);
+  font-size: var(--ms-text-xs);
+  text-align: center;
+  color: var(--ms-text-muted);
+}
+.user-greeting {
+  color: #6ee7b7;
+  font-weight: 600;
+  font-size: var(--ms-text-sm);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  margin: var(--ms-space-4) 0;
+}
+
+/* ========================
+   Login section
+======================== */
+.login-section {
+  background: rgba(99,102,241,0.06);
+  border: 1px solid rgba(99,102,241,0.2);
+  border-radius: var(--ms-radius-xl);
+  padding: var(--ms-space-6);
+  margin-bottom: var(--ms-space-6);
+  text-align: center;
+}
+.login-section p {
+  color: var(--ms-text-muted);
+  margin: 0 0 var(--ms-space-4) 0;
+  font-size: var(--ms-text-sm);
+}
+#googleSignInButton { display: inline-block; margin-top: var(--ms-space-3); }
+
+/* ========================
+   Dashboard
+======================== */
+.dashboard { display: flex; flex-direction: column; gap: var(--ms-space-6); }
+
+.user-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--ms-space-6);
+  background: var(--ms-bg-dark3);
+  border-radius: var(--ms-radius-xl);
+  border: 1px solid rgba(255,255,255,0.07);
+  flex-wrap: wrap;
+  gap: var(--ms-space-4);
+}
+.user-header { display: flex; align-items: center; gap: var(--ms-space-3); }
+.user-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--ms-primary);
+}
+.user-header h3 { margin: 0; font-size: var(--ms-text-base); color: var(--ms-text-white); }
+.user-header p  { margin: 0; font-size: var(--ms-text-sm); color: var(--ms-text-muted); }
+
+.subscription-info,
+.no-subscription,
+.stats,
+.recent-conversions {
+  background: var(--ms-bg-dark3);
+  padding: var(--ms-space-6);
+  border-radius: var(--ms-radius-xl);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.subscription-info h3,
+.no-subscription h3,
+.stats h3,
+.recent-conversions h3 {
+  margin: 0 0 var(--ms-space-4) 0;
+  color: var(--ms-text-white);
+  font-size: var(--ms-text-lg);
+}
+
+.subscription-details { margin: var(--ms-space-4) 0; }
+.subscription-details p {
+  margin: var(--ms-space-2) 0;
+  font-size: var(--ms-text-sm);
+  color: var(--ms-text-light);
+}
+.subscription-details strong { color: var(--ms-text-white); }
+
+.no-subscription p { color: var(--ms-text-muted); font-size: var(--ms-text-sm); margin: var(--ms-space-2) 0; }
+
+.recent-conversions ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: var(--ms-space-2); }
+.recent-conversions li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--ms-space-3) var(--ms-space-4);
+  background: var(--ms-bg-dark2);
+  border-radius: var(--ms-radius-md);
+  font-size: var(--ms-text-sm);
+  flex-wrap: wrap;
+  gap: var(--ms-space-2);
+}
+.recent-conversions li span { color: var(--ms-text-muted); }
+
+.dashboard-loading {
+  text-align: center;
+  padding: var(--ms-space-12);
+  color: var(--ms-text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--ms-space-4);
+}
+
+/* ========================
+   Subscription Plans
+======================== */
+.subscription-plans { padding: var(--ms-space-4) 0; }
+.plans-subtitle {
+  text-align: center;
+  color: var(--ms-text-muted);
+  margin-bottom: var(--ms-space-8);
+  font-size: var(--ms-text-sm);
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--ms-space-6);
+  margin: var(--ms-space-6) 0;
+}
+
+.plan-card {
+  background: var(--ms-bg-dark3);
+  border-radius: var(--ms-radius-xl);
+  padding: var(--ms-space-8);
+  border: 2px solid rgba(255,255,255,0.07);
+  transition: all var(--ms-ease-normal);
+  position: relative;
+}
+.plan-card:hover {
+  border-color: var(--ms-primary);
+  transform: translateY(-4px);
+  box-shadow: var(--ms-shadow-glow);
+}
+.plan-card.popular { border-color: var(--ms-primary); }
+
+.popular-badge {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background: var(--ms-gradient-brand);
+  color: var(--ms-text-white);
+  padding: 4px 14px;
+  border-radius: var(--ms-radius-full);
+  font-size: var(--ms-text-xs);
+  font-weight: 700;
+}
+
+.plan-card h3 { margin: 0 0 var(--ms-space-4) 0; font-size: var(--ms-text-xl); color: var(--ms-text-white); }
+
+.plan-price { display: flex; align-items: baseline; gap: var(--ms-space-2); margin-bottom: var(--ms-space-3); }
+.plan-price .price { font-size: 2.5rem; font-weight: 800; color: var(--ms-primary-light); }
+.plan-price .currency { color: var(--ms-text-muted); font-size: var(--ms-text-sm); }
+
+.plan-conversions { font-size: var(--ms-text-xl); margin: var(--ms-space-4) 0; color: #6ee7b7; font-weight: 600; }
+
+.plan-description { color: var(--ms-text-muted); margin: var(--ms-space-2) 0; font-size: var(--ms-text-sm); }
+
+.plan-features {
+  margin: var(--ms-space-6) 0;
+  padding: var(--ms-space-4) 0;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.plan-features p { margin: var(--ms-space-2) 0; color: var(--ms-text-muted); font-size: var(--ms-text-sm); }
+
+.price-per-conversion {
+  text-align: center;
+  margin-top: var(--ms-space-3);
+  font-size: var(--ms-text-xs);
+  color: var(--ms-text-muted);
+}
+
+.login-prompt {
+  text-align: center;
+  margin-top: var(--ms-space-6);
+  padding: var(--ms-space-4);
+  background: rgba(245,158,11,0.1);
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: var(--ms-radius-lg);
+  color: #fcd34d;
+  font-size: var(--ms-text-sm);
+}
+
+/* ========================
+   Selector de modo de pago
+======================== */
+.payment-mode-selector {
+  display: flex;
+  gap: var(--ms-space-3);
+  margin: var(--ms-space-6) 0;
+  justify-content: center;
+}
+
+.onetime-payment,
+.subscription-payment { margin-top: var(--ms-space-6); }
+
+.subscription-notice {
+  background: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.3);
+  padding: var(--ms-space-4);
+  border-radius: var(--ms-radius-lg);
+  margin: var(--ms-space-4) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ms-space-3);
+}
+.subscription-notice p { margin: 0; font-size: var(--ms-text-sm); color: #6ee7b7; }
+
+/* ========================
+   Pasos (step indicator)
+======================== */
+.step-title {
+  font-size: var(--ms-text-xl);
+  font-weight: 700;
+  color: var(--ms-text-white);
+  margin: 0 0 var(--ms-space-2) 0;
+  display: flex;
+  align-items: center;
+  gap: var(--ms-space-3);
+}
+.step-number {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--ms-gradient-brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--ms-text-sm);
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.step-desc {
+  color: var(--ms-text-muted);
+  font-size: var(--ms-text-sm);
+  margin: 0 0 var(--ms-space-6) 0;
+}
+
+/* ========================
+   PayPal link button
+======================== */
+.paypal-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ms-space-2);
+  padding: 0.625rem var(--ms-space-6);
+  background: #0070ba;
+  color: #fff;
+  border-radius: var(--ms-radius-lg);
+  font-weight: 600;
+  font-size: var(--ms-text-sm);
+  border: none;
+  cursor: pointer;
+  transition: background var(--ms-ease-fast);
+  text-decoration: none;
+}
+.paypal-link:hover { background: #005ea6; }

@@ -7,8 +7,6 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from .converter_ai_vision_2 import convert_pdf_to_excel_ai_vision_2
-from .converter_ai_vision import convert_pdf_to_excel_ai_vision
 from .converter_ai_full import convert_pdf_to_excel_ai_full
 from .converterIA import convert_pdf_to_excel_ai
 from .paypal_client import create_order, capture_order, OrderRequest, CartItem, create_subscription_plan, create_subscription
@@ -30,27 +28,36 @@ class CreateOrderBody(BaseModel):
     pass
 
 
+_MAX_PDF_BYTES = int(os.getenv("MAX_PDF_MB", "50")) * 1024 * 1024  # default 50 MB
+_TMP_DIR = os.path.join(os.path.dirname(__file__), "..", "tmp_uploads")
+
+
 @router.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
-    if not file.filename.lower().endswith(".pdf"):
+    if not (file.filename or "").lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Formato inválido: solo PDF")
-    # store temporarily
-    tmp_dir = os.path.join(os.getcwd(), "tmp_uploads")
-    os.makedirs(tmp_dir, exist_ok=True)
+    os.makedirs(_TMP_DIR, exist_ok=True)
     tmp_id = str(uuid.uuid4())
-    pdf_path = os.path.join(tmp_dir, f"{tmp_id}.pdf")
+    pdf_path = os.path.join(_TMP_DIR, f"{tmp_id}.pdf")
     try:
         content = await file.read()
         if len(content) == 0:
             raise HTTPException(status_code=400, detail="Archivo vacío")
+        if len(content) > _MAX_PDF_BYTES:
+            raise HTTPException(
+                status_code=413,
+                detail=f"Archivo demasiado grande. Límite: {_MAX_PDF_BYTES // (1024*1024)} MB"
+            )
         with open(pdf_path, "wb") as f:
             f.write(content)
-        # return token to reference later
         return {"upload_id": tmp_id}
     except HTTPException:
         raise
+    except OSError as e:
+        logger.error("Error de escritura al subir PDF: %s", e)
+        raise HTTPException(status_code=500, detail="Error al guardar el archivo")
     except Exception as e:
-        logger.error("Upload error: %s", e)
+        logger.exception("Error inesperado en upload_pdf")
         raise HTTPException(status_code=500, detail="Error al subir el archivo")
 
 
@@ -103,14 +110,13 @@ async def paypal_capture_and_convert(
         raise HTTPException(status_code=500, detail="Error capturando pago de PayPal")
 
     # Proceed to convert
-    tmp_dir = os.path.join(os.getcwd(), "tmp_uploads")
-    pdf_path = os.path.join(tmp_dir, f"{body.upload_id}.pdf")
+    pdf_path = os.path.join(_TMP_DIR, f"{body.upload_id}.pdf")
     if not os.path.isfile(pdf_path):
-        raise HTTPException(status_code=404, detail="Archivo no encontrado, vuelve a subir el PDF")
+        raise HTTPException(status_code=400, detail="El PDF ya no está disponible. Vuelve a subirlo.")
     
     try:
         # Estrategia FULL (PDF completo) para máxima fidelidad
-        excel_bytes = convert_pdf_to_excel_ai_full(pdf_path)
+        excel_bytes = await convert_pdf_to_excel_ai_full(pdf_path)
         
         # Record conversion
         conversion = Conversion(
@@ -176,10 +182,9 @@ async def convert_without_payment(
     if not can_convert:
         raise HTTPException(status_code=402, detail=message)
     
-    tmp_dir = os.path.join(os.getcwd(), "tmp_uploads")
-    pdf_path = os.path.join(tmp_dir, f"{body.upload_id}.pdf")
+    pdf_path = os.path.join(_TMP_DIR, f"{body.upload_id}.pdf")
     if not os.path.isfile(pdf_path):
-        raise HTTPException(status_code=404, detail="Archivo no encontrado, vuelve a subir el PDF")
+        raise HTTPException(status_code=400, detail="El PDF ya no está disponible. Vuelve a subirlo.")
     
     try:
         excel_bytes = convert_pdf_to_excel_ai(pdf_path)

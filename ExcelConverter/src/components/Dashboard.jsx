@@ -6,27 +6,18 @@ const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
 export default function Dashboard() {
   const { user, logout, getAuthHeader } = useAuth()
   const [dashboard, setDashboard] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [loading, setLoading]     = useState(true)
+  const [error, setError]         = useState('')
 
-  useEffect(() => {
-    loadDashboard()
-  }, [])
+  useEffect(() => { loadDashboard() }, [])
 
   const loadDashboard = async () => {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch(`${API_BASE}/subscriptions/dashboard`, {
-        headers: getAuthHeader()
-      })
-
-      if (!res.ok) {
-        throw new Error('Error al cargar el dashboard')
-      }
-
-      const data = await res.json()
-      setDashboard(data)
+      const res = await fetch(`${API_BASE}/subscriptions/dashboard`, { headers: getAuthHeader() })
+      if (!res.ok) throw new Error('Error al cargar el panel de control.')
+      setDashboard(await res.json())
     } catch (err) {
       setError(err.message)
     } finally {
@@ -36,46 +27,43 @@ export default function Dashboard() {
 
   const cancelSubscription = async () => {
     if (!dashboard?.active_subscription) return
-    
-    const confirmed = confirm('¿Estás seguro de que deseas cancelar tu suscripción?')
-    if (!confirmed) return
-
+    if (!confirm('¿Cancelar tu suscripción activa?')) return
     try {
       const res = await fetch(
         `${API_BASE}/subscriptions/${dashboard.active_subscription.id}`,
-        {
-          method: 'DELETE',
-          headers: getAuthHeader()
-        }
+        { method: 'DELETE', headers: getAuthHeader() }
       )
-
-      if (!res.ok) {
-        throw new Error('Error al cancelar la suscripción')
-      }
-
-      alert('Suscripción cancelada exitosamente')
+      if (!res.ok) throw new Error('No se pudo cancelar.')
       loadDashboard()
     } catch (err) {
-      alert(`Error: ${err.message}`)
+      setError(err.message)
     }
   }
 
   if (loading) {
-    return <div className="dashboard-loading">Cargando...</div>
+    return (
+      <div className="dashboard-loading">
+        <div className="ms-spinner" style={{ width:'2rem', height:'2rem' }}></div>
+        <span style={{ color:'var(--ms-text-muted)' }}>Cargando tu cuenta...</span>
+      </div>
+    )
   }
 
   if (error) {
-    return <div className="error">Error: {error}</div>
+    return <div className="status-msg error">{error}</div>
   }
 
-  const subscription = dashboard?.active_subscription
-  const conversionsRemaining = dashboard?.conversions_remaining
+  const sub = dashboard?.active_subscription
 
   return (
     <div className="dashboard">
+      {/* Perfil */}
       <div className="user-info">
         <div className="user-header">
-          {user?.picture && <img src={user.picture} alt={user.name} className="user-avatar" />}
+          {user?.picture
+            ? <img src={user.picture} alt={user.name} className="user-avatar" />
+            : <div className="ms-avatar">{user?.name?.[0]?.toUpperCase()}</div>
+          }
           <div>
             <h3>{user?.name}</h3>
             <p>{user?.email}</p>
@@ -84,41 +72,57 @@ export default function Dashboard() {
         <button className="btn btn-secondary" onClick={logout}>Cerrar sesión</button>
       </div>
 
-      {subscription ? (
+      {/* Suscripción */}
+      {sub ? (
         <div className="subscription-info">
-          <h3>Suscripción Activa</h3>
-          <div className="subscription-details">
-            <p><strong>Plan:</strong> {getPlanName(subscription.plan_type)}</p>
-            <p><strong>Precio:</strong> ${subscription.price} {subscription.currency}/mes</p>
-            <p><strong>Conversiones:</strong> {subscription.conversions_used} / {subscription.conversions_limit}</p>
-            <p><strong>Conversiones restantes:</strong> {conversionsRemaining}</p>
-            <p><strong>Válido hasta:</strong> {new Date(subscription.end_date).toLocaleDateString('es-MX')}</p>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:'var(--ms-space-3)', marginBottom:'var(--ms-space-4)' }}>
+            <h3 style={{ margin:0 }}>Suscripción activa</h3>
+            <span className="ms-badge ms-badge--success">Activa</span>
           </div>
-          <button className="btn btn-danger" onClick={cancelSubscription}>
-            Cancelar Suscripción
+          <div className="subscription-details">
+            <p><strong>Plan:</strong> {getPlanName(sub.plan_type)}</p>
+            <p><strong>Precio:</strong> ${sub.price} {sub.currency}/mes</p>
+            <p>
+              <strong>Conversiones:</strong>{' '}
+              {sub.conversions_used} / {sub.conversions_limit}{' '}
+              <span className="ms-badge ms-badge--primary" style={{ marginLeft:'var(--ms-space-2)' }}>
+                {dashboard.conversions_remaining} restantes
+              </span>
+            </p>
+            <p><strong>Válido hasta:</strong> {new Date(sub.end_date).toLocaleDateString('es-MX')}</p>
+          </div>
+          <button className="btn btn-danger ms-btn--sm" onClick={cancelSubscription}>
+            Cancelar suscripción
           </button>
         </div>
       ) : (
         <div className="no-subscription">
-          <p>No tienes una suscripción activa</p>
-          <p>Puedes pagar por conversión única o suscribirte para obtener más conversiones a mejor precio</p>
+          <h3>Sin suscripción activa</h3>
+          <p>Puedes pagar por conversión única ($20 MXN) o suscribirte para obtener hasta 600 conversiones mensuales.</p>
         </div>
       )}
 
+      {/* Estadísticas */}
       <div className="stats">
         <h3>Estadísticas</h3>
-        <p><strong>Total de conversiones:</strong> {dashboard?.total_conversions || 0}</p>
+        <p>
+          <strong>Total de conversiones realizadas:</strong>{' '}
+          <span className="ms-badge ms-badge--primary">{dashboard?.total_conversions || 0}</span>
+        </p>
       </div>
 
-      {dashboard?.recent_conversions && dashboard.recent_conversions.length > 0 && (
+      {/* Conversiones recientes */}
+      {dashboard?.recent_conversions?.length > 0 && (
         <div className="recent-conversions">
-          <h3>Conversiones Recientes</h3>
+          <h3>Conversiones recientes</h3>
           <ul>
             {dashboard.recent_conversions.map((conv) => (
               <li key={conv.id}>
-                <span>{conv.filename || 'Sin nombre'}</span>
+                <span style={{ fontWeight:500, color:'var(--ms-text-white)' }}>
+                  {conv.filename || 'Sin nombre'}
+                </span>
                 <span>{new Date(conv.created_at).toLocaleDateString('es-MX')}</span>
-                <span className={conv.success ? 'success' : 'error'}>
+                <span className={`ms-badge ${conv.success ? 'ms-badge--success' : 'ms-badge--danger'}`}>
                   {conv.success ? '✓ Exitosa' : '✗ Fallida'}
                 </span>
               </li>
@@ -126,15 +130,12 @@ export default function Dashboard() {
           </ul>
         </div>
       )}
+
+      {error && <div className="status-msg error">{error}</div>}
     </div>
   )
 }
 
 function getPlanName(planType) {
-  const names = {
-    basic: 'Básico (200 conversiones)',
-    standard: 'Estándar (400 conversiones)',
-    premium: 'Premium (600 conversiones)'
-  }
-  return names[planType] || planType
+  return { basic: 'Básico (200)', standard: 'Estándar (400)', premium: 'Premium (600)' }[planType] ?? planType
 }

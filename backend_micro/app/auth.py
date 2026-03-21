@@ -18,9 +18,18 @@ from .schemas import UserCreate
 load_dotenv()
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
-JWT_SECRET = os.getenv("JWT_SECRET", "your-secret-key-change-in-production")
+
+_raw_secret = os.getenv("JWT_SECRET", "")
+if not _raw_secret or len(_raw_secret) < 32 or _raw_secret == "your-secret-key-change-in-production":
+    import sys, logging as _log
+    _log.getLogger(__name__).critical(
+        "JWT_SECRET no está configurado o es inseguro (mínimo 32 caracteres). "
+        "El servidor no arrancará sin esta variable."
+    )
+    sys.exit(1)
+JWT_SECRET: str = _raw_secret
 JWT_ALGORITHM = "HS256"
-JWT_EXPIRATION_HOURS = 24 * 30  # 30 days
+JWT_EXPIRATION_HOURS = 24 * 30  # 30 días
 
 def create_jwt_token(user_id: int, email: str) -> str:
     """Create a JWT token for authenticated user"""

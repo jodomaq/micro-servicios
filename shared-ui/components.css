@@ -1,0 +1,339 @@
+/*
+ * Micro-Servicios — Componentes compartidos
+ * Requiere tokens.css cargado primero.
+ *
+ * Uso: @import './tokens.css'; @import './components.css';
+ * o en Vite/React: import '../shared-ui/tokens.css'; import '../shared-ui/components.css';
+ */
+
+/* ========================
+   Reset mínimo
+======================== */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ========================
+   Navbar
+======================== */
+.ms-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--ms-nav-height);
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--ms-space-8);
+  gap: var(--ms-space-4);
+}
+
+.ms-nav__logo {
+  font-family: var(--ms-font);
+  font-size: var(--ms-text-xl);
+  font-weight: 700;
+  background: var(--ms-gradient-brand);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none;
+}
+
+.ms-nav__links {
+  display: flex;
+  gap: var(--ms-space-6);
+  list-style: none;
+  margin: 0 auto 0 var(--ms-space-8);
+  padding: 0;
+}
+
+.ms-nav__link {
+  font-size: var(--ms-text-sm);
+  font-weight: 500;
+  color: var(--ms-text-muted);
+  text-decoration: none;
+  transition: color var(--ms-ease-fast);
+}
+.ms-nav__link:hover,
+.ms-nav__link.active { color: var(--ms-text-white); }
+
+/* ========================
+   Botones
+======================== */
+.ms-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ms-space-2);
+  padding: 0.625rem var(--ms-space-6);
+  font-family: var(--ms-font);
+  font-size: var(--ms-text-sm);
+  font-weight: 600;
+  border-radius: var(--ms-radius-lg);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--ms-ease-fast);
+  white-space: nowrap;
+}
+.ms-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.ms-btn--primary {
+  background: var(--ms-gradient-brand);
+  color: var(--ms-text-white);
+  box-shadow: var(--ms-shadow-md);
+}
+.ms-btn--primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: var(--ms-shadow-glow);
+}
+
+.ms-btn--secondary {
+  background: rgba(99, 102, 241, 0.15);
+  color: var(--ms-primary-light);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+.ms-btn--secondary:hover:not(:disabled) {
+  background: rgba(99, 102, 241, 0.25);
+  border-color: var(--ms-primary);
+}
+
+.ms-btn--ghost {
+  background: transparent;
+  color: var(--ms-text-muted);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.ms-btn--ghost:hover:not(:disabled) {
+  color: var(--ms-text-white);
+  border-color: rgba(255,255,255,0.3);
+}
+
+.ms-btn--danger {
+  background: var(--ms-danger);
+  color: var(--ms-text-white);
+}
+.ms-btn--danger:hover:not(:disabled) {
+  background: var(--ms-danger-dark);
+  transform: translateY(-1px);
+}
+
+.ms-btn--sm {
+  padding: 0.375rem var(--ms-space-4);
+  font-size: var(--ms-text-xs);
+  border-radius: var(--ms-radius-md);
+}
+
+.ms-btn--lg {
+  padding: 0.875rem var(--ms-space-8);
+  font-size: var(--ms-text-base);
+  border-radius: var(--ms-radius-xl);
+}
+
+/* ========================
+   Cards
+======================== */
+.ms-card {
+  background: var(--ms-bg-dark2);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--ms-radius-xl);
+  padding: var(--ms-space-6);
+  transition: border-color var(--ms-ease-fast), box-shadow var(--ms-ease-fast);
+}
+.ms-card:hover {
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: var(--ms-shadow-lg);
+}
+
+.ms-card--glass {
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+}
+
+.ms-card__title {
+  font-size: var(--ms-text-lg);
+  font-weight: 600;
+  color: var(--ms-text-white);
+  margin: 0 0 var(--ms-space-2) 0;
+}
+
+.ms-card__body {
+  font-size: var(--ms-text-sm);
+  color: var(--ms-text-muted);
+  line-height: 1.6;
+}
+
+/* ========================
+   Formularios
+======================== */
+.ms-label {
+  display: block;
+  font-size: var(--ms-text-sm);
+  font-weight: 500;
+  color: var(--ms-text-light);
+  margin-bottom: var(--ms-space-2);
+}
+
+.ms-input {
+  width: 100%;
+  padding: 0.625rem var(--ms-space-4);
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--ms-radius-lg);
+  font-family: var(--ms-font);
+  font-size: var(--ms-text-sm);
+  color: var(--ms-text-white);
+  outline: none;
+  transition: border-color var(--ms-ease-fast), box-shadow var(--ms-ease-fast);
+}
+.ms-input::placeholder { color: var(--ms-text-muted); }
+.ms-input:focus {
+  border-color: var(--ms-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+.ms-input--error { border-color: var(--ms-danger); }
+.ms-input--error:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.2); }
+
+.ms-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ms-space-1);
+  margin-bottom: var(--ms-space-4);
+}
+
+.ms-error-text {
+  font-size: var(--ms-text-xs);
+  color: var(--ms-danger);
+}
+
+/* ========================
+   Badges / Pills
+======================== */
+.ms-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  font-size: var(--ms-text-xs);
+  font-weight: 600;
+  border-radius: var(--ms-radius-full);
+}
+.ms-badge--primary {
+  background: rgba(99,102,241,0.2);
+  color: var(--ms-primary-light);
+}
+.ms-badge--success {
+  background: rgba(16,185,129,0.2);
+  color: #34d399;
+}
+.ms-badge--warning {
+  background: rgba(245,158,11,0.2);
+  color: #fbbf24;
+}
+.ms-badge--danger {
+  background: rgba(239,68,68,0.2);
+  color: #f87171;
+}
+
+/* ========================
+   Layout helpers
+======================== */
+.ms-container {
+  width: 100%;
+  max-width: var(--ms-max-width);
+  margin: 0 auto;
+  padding: 0 var(--ms-space-6);
+}
+
+.ms-page {
+  min-height: 100vh;
+  background: var(--ms-bg-dark);
+  font-family: var(--ms-font);
+  color: var(--ms-text-light);
+}
+
+.ms-section {
+  padding: var(--ms-space-16) 0;
+}
+
+.ms-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ms-space-6); }
+.ms-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--ms-space-6); }
+.ms-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--ms-space-6); }
+
+@media (max-width: 768px) {
+  .ms-grid-2, .ms-grid-3, .ms-grid-4 { grid-template-columns: 1fr; }
+  .ms-nav { padding: 0 var(--ms-space-4); }
+  .ms-nav__links { display: none; }
+}
+
+/* ========================
+   Alertas
+======================== */
+.ms-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ms-space-3);
+  padding: var(--ms-space-4);
+  border-radius: var(--ms-radius-lg);
+  font-size: var(--ms-text-sm);
+  border: 1px solid transparent;
+}
+.ms-alert--info {
+  background: rgba(14,165,233,0.1);
+  border-color: rgba(14,165,233,0.3);
+  color: #7dd3fc;
+}
+.ms-alert--success {
+  background: rgba(16,185,129,0.1);
+  border-color: rgba(16,185,129,0.3);
+  color: #6ee7b7;
+}
+.ms-alert--warning {
+  background: rgba(245,158,11,0.1);
+  border-color: rgba(245,158,11,0.3);
+  color: #fcd34d;
+}
+.ms-alert--error {
+  background: rgba(239,68,68,0.1);
+  border-color: rgba(239,68,68,0.3);
+  color: #fca5a5;
+}
+
+/* ========================
+   Spinner
+======================== */
+.ms-spinner {
+  width: 1.25em;
+  height: 1.25em;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: var(--ms-primary);
+  border-radius: 50%;
+  animation: ms-spin 0.6s linear infinite;
+  display: inline-block;
+}
+@keyframes ms-spin { to { transform: rotate(360deg); } }
+
+/* ========================
+   Divider
+======================== */
+.ms-divider {
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  margin: var(--ms-space-6) 0;
+}
+
+/* ========================
+   Avatar
+======================== */
+.ms-avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--ms-radius-full);
+  background: var(--ms-gradient-brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: var(--ms-text-sm);
+  color: var(--ms-text-white);
+  flex-shrink: 0;
+}

@@ -3,23 +3,22 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { PayPalScriptProvider } from '@paypal/react-paypal-js';
 import App from './App.jsx';
+import '../../../../shared-ui/tokens.css';
+import '../../../../shared-ui/components.css';
 import './index.css';
 
-// Configuración de PayPal
 const paypalOptions = {
-  "client-id": "AYJPAOcofc2w51eYx9ZpYhNsVzhjcrOGyMZOa2VydOl9nvVI6BcoaEM7dYVqyHHYaFUkrjsV2eN_A8th", // Usa "test" para el entorno de pruebas
+  "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID || "test",
   currency: "MXN",
-  intent: "capture"
+  intent: "capture",
 };
 
-// Determinar basename para BrowserRouter a partir de VITE_BASE_PATH
 const rawBase = import.meta.env.VITE_BASE_PATH || '/';
-// Normalizamos: '/quiz/' -> '/quiz'; '/' permanece '/'
-const routerBasename = rawBase === '/' ? '/' : ('/' + rawBase.replace(/^\/+|\/+$/g, ''));
+const routerBasename = rawBase === '/' ? undefined : ('/' + rawBase.replace(/^\/+|\/+$/g, ''));
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <PayPalScriptProvider options={paypalOptions}>
-    <BrowserRouter basename={routerBasename === '/' ? undefined : routerBasename}>
+    <BrowserRouter basename={routerBasename}>
       <App />
     </BrowserRouter>
   </PayPalScriptProvider>

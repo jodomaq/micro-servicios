@@ -3,9 +3,16 @@ from sqlalchemy.future import select
 from sqlalchemy.sql import func
 import json
 import random
+import logging
+from pathlib import Path
 from typing import List, Dict, Any, Optional
 
 from . import models, schemas
+
+logger = logging.getLogger("iqtest.crud")
+
+# Ruta al banco de preguntas JSON (relativa a este módulo)
+_QUESTIONS_JSON = Path(__file__).parent.parent.parent.parent / "IQTest" / "files" / "iq_test_50_questions.json"
 
 # Funciones CRUD para User
 async def create_user(db: AsyncSession) -> models.User:
@@ -58,111 +65,84 @@ async def get_questions(db: AsyncSession) -> List[models.Question]:
     return result.scalars().all()
 
 async def create_test_questions(db: AsyncSession) -> None:
-    """Crea preguntas de ejemplo si no existen"""
-    # Verificar si ya existen preguntas
+    """Siembra las preguntas del banco JSON si la tabla está vacía.
+
+    Carga primero desde IQTest/files/iq_test_50_questions.json (50 preguntas).
+    Si el archivo no existe, usa el conjunto mínimo de respaldo (9 preguntas).
+    """
     result = await db.execute(select(func.count()).select_from(models.Question))
-    count = result.scalar()
-    
-    if count > 0:
+    if result.scalar() > 0:
         return
-    
-    # Preguntas de razonamiento lógico
-    logical_questions = [
-        {
-            "text": "¿Qué número continúa la secuencia? 2, 4, 8, 16, ...",
-            "options": ["24", "32", "30", "64"],
-            "correct_answer": "32",
-            "question_type": "logical",
-            "difficulty": 1.0
-        },
-        {
-            "text": "Si todos los zorros son astutos y algunos astutos son rápidos, entonces:",
-            "options": [
-                "Todos los zorros son rápidos",
-                "Algunos zorros son rápidos",
-                "Ningún zorro es rápido",
-                "No se puede determinar"
-            ],
-            "correct_answer": "No se puede determinar",
-            "question_type": "logical",
-            "difficulty": 1.5
-        },
-        {
-            "text": "Si A=1, B=2, C=3... ¿cuánto vale INTELIGENCIA?",
-            "options": ["120", "121", "122", "123"],
-            "correct_answer": "121",
-            "question_type": "logical",
-            "difficulty": 1.2
-        }
-    ]
-    
-    # Preguntas de razonamiento verbal
-    verbal_questions = [
-        {
-            "text": "Identifica la palabra que no pertenece al grupo:",
-            "options": ["Manzana", "Plátano", "Tomate", "Zanahoria"],
-            "correct_answer": "Zanahoria",
-            "question_type": "verbal",
-            "difficulty": 1.0
-        },
-        {
-            "text": "Completa la analogía: Libro es a Leer como Comida es a...",
-            "options": ["Cocinar", "Comer", "Hambre", "Restaurante"],
-            "correct_answer": "Comer",
-            "question_type": "verbal",
-            "difficulty": 1.0
-        }
-    ]
-    
-    # Preguntas de razonamiento matemático
-    mathematical_questions = [
-        {
-            "text": "¿Cuál es la raíz cuadrada de 144?",
-            "options": ["12", "14", "16", "18"],
-            "correct_answer": "12",
-            "question_type": "mathematical",
-            "difficulty": 1.0
-        },
-        {
-            "text": "Si x + y = 10 y x - y = 4, ¿cuánto vale x?",
-            "options": ["5", "6", "7", "8"],
-            "correct_answer": "7",
-            "question_type": "mathematical",
-            "difficulty": 1.3
-        }
-    ]
-    
-    # Preguntas de razonamiento espacial
-    spatial_questions = [
-        {
-            "text": "¿Qué figura completa la secuencia?",
-            "options": ["Cuadrado", "Triángulo", "Círculo", "Hexágono"],
-            "correct_answer": "Triángulo",
-            "question_type": "spatial",
-            "difficulty": 1.2
-        },
-        {
-            "text": "Si doblas este patrón, ¿qué forma obtendrás?",
-            "options": ["Cubo", "Pirámide", "Cilindro", "Cono"],
-            "correct_answer": "Cubo",
-            "question_type": "spatial",
-            "difficulty": 1.5
-        }
-    ]
-    
-    # Combinar todas las preguntas
-    all_questions = logical_questions + verbal_questions + mathematical_questions + spatial_questions
-    
-    # Crear cada pregunta en la base de datos
-    for q in all_questions:
+
+    raw_questions: List[Dict[str, Any]] = []
+
+    # Intentar cargar desde el JSON externo
+    if _QUESTIONS_JSON.exists():
+        try:
+            data = json.loads(_QUESTIONS_JSON.read_text(encoding="utf-8"))
+            raw_questions = data.get("questions", [])
+            logger.info("Banco de preguntas cargado desde %s (%d preguntas)", _QUESTIONS_JSON, len(raw_questions))
+        except Exception as exc:
+            logger.warning("No se pudo leer %s: %s — usando preguntas de respaldo", _QUESTIONS_JSON, exc)
+            raw_questions = []
+
+    # Respaldo si no hay JSON
+    if not raw_questions:
+        logger.info("Usando banco de preguntas de respaldo (9 preguntas)")
+        raw_questions = _FALLBACK_QUESTIONS
+
+    for q in raw_questions:
+        # options puede ser una lista o un string JSON "[\"A\", \"B\"]"
+        opts = q.get("options", [])
+        if isinstance(opts, str):
+            try:
+                opts = json.loads(opts)
+            except Exception:
+                opts = [opts]
+
         question = schemas.QuestionCreate(
             text=q["text"],
-            question_type=q["question_type"],
-            options=q["options"],
+            question_type=q.get("question_type", "logical"),
+            options=opts,
             correct_answer=q["correct_answer"],
-            difficulty=q["difficulty"]
+            difficulty=float(q.get("difficulty", 1.0)),
         )
         await create_question(db, question)
+
+    logger.info("Base de datos sembrada con %d preguntas", len(raw_questions))
+
+
+# Preguntas de respaldo si el archivo JSON no está disponible
+_FALLBACK_QUESTIONS: List[Dict[str, Any]] = [
+    {"text": "¿Qué número continúa la secuencia? 2, 4, 8, 16, ...",
+     "options": ["24", "32", "30", "64"], "correct_answer": "32",
+     "question_type": "logical", "difficulty": 1.0},
+    {"text": "Si todos los zorros son astutos y algunos astutos son rápidos, entonces:",
+     "options": ["Todos los zorros son rápidos", "Algunos zorros son rápidos",
+                 "Ningún zorro es rápido", "No se puede determinar"],
+     "correct_answer": "No se puede determinar", "question_type": "logical", "difficulty": 1.5},
+    {"text": "Si A=1, B=2, C=3... ¿cuánto vale CEREBRO?",
+     "options": ["64", "66", "68", "70"], "correct_answer": "66",
+     "question_type": "logical", "difficulty": 1.2},
+    {"text": "Identifica la palabra que no pertenece al grupo:",
+     "options": ["Manzana", "Plátano", "Tomate", "Zanahoria"],
+     "correct_answer": "Zanahoria", "question_type": "verbal", "difficulty": 1.0},
+    {"text": "Completa la analogía: Libro es a Leer como Comida es a...",
+     "options": ["Cocinar", "Comer", "Hambre", "Restaurante"],
+     "correct_answer": "Comer", "question_type": "verbal", "difficulty": 1.0},
+    {"text": "¿Cuál es la raíz cuadrada de 144?",
+     "options": ["12", "14", "16", "18"], "correct_answer": "12",
+     "question_type": "mathematical", "difficulty": 1.0},
+    {"text": "Si x + y = 10 y x - y = 4, ¿cuánto vale x?",
+     "options": ["5", "6", "7", "8"], "correct_answer": "7",
+     "question_type": "mathematical", "difficulty": 1.3},
+    {"text": "¿Qué figura completa la secuencia: cuadrado, círculo, triángulo, ...?",
+     "options": ["Cuadrado", "Triángulo", "Círculo", "Hexágono"],
+     "correct_answer": "Cuadrado", "question_type": "spatial", "difficulty": 1.2},
+    {"text": "Si doblas este patrón en cruz, ¿qué forma obtendrás?",
+     "options": ["Cubo", "Pirámide", "Cilindro", "Cono"],
+     "correct_answer": "Cubo", "question_type": "spatial", "difficulty": 1.5},
+]
 
 # Funciones CRUD para Response/Answer
 async def save_answers(db: AsyncSession, answers: schemas.AnswerList, user_id: int) -> None:

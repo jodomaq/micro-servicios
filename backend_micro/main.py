@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr
 import os
 import logging
+from html import escape as _html_escape
 from dotenv import load_dotenv
 from smtp_email import SMTPEmailSender
 
@@ -14,25 +15,33 @@ load_dotenv()
 
 app = FastAPI(
     title="Micro-Servicios API",
-    description="API unificada: Excel Converter, Estructura Política y Mesa de Regalos",
-    version="2.0.0"
+    description="API unificada: Excel Converter, Estructura Política, Mesa de Regalos e IQ Test",
+    version="2.1.0"
 )
 
 # ====================================
 # CORS
+# Orígenes base + extras desde EP_CORS_ORIGINS o CORS_ORIGINS
 # ====================================
+_base_origins = [
+    "https://micro-servicios.com.mx",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:5175",
+    "http://localhost:5176",
+    "http://localhost:5177",
+    "http://localhost:5178",
+]
+_extra = os.getenv("CORS_ORIGINS") or os.getenv("EP_CORS_ORIGINS", "")
+_extra_list = [o.strip() for o in _extra.split(",") if o.strip()]
+_allowed_origins = list(dict.fromkeys(_base_origins + _extra_list))  # dedup preservando orden
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://micro-servicios.com.mx",
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://localhost:5175",
-        "http://localhost:5176",
-    ],
+    allow_origins=_allowed_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allow_headers=["*"],
+    allow_headers=["Content-Type", "Authorization", "X-Tenant-ID"],
 )
 
 # ====================================
@@ -176,12 +185,13 @@ async def log_requests(request: Request, call_next):
 async def root():
     return {
         "message": "Micro-Servicios API",
-        "version": "2.0.0",
+        "version": "2.1.0",
         "status": "active",
         "services": [
             "Excel Converter (/auth, /converter, /subscriptions)",
             "Estructura Política (/api/auth, /api/committees, /api/...)",
             "Mesa de Regalos (/api/v1/auth, /api/v1/...)",
+            "IQ Test (/iqtest/api/questions, /iqtest/api/evaluate, /iqtest/api/...)",
         ]
     }
 
@@ -226,6 +236,12 @@ async def send_email(contact_form: ContactForm):
 
         subject = f"Nuevo contacto desde Micro-Servicios - {contact_form.service}"
 
+        # Escapar HTML para prevenir inyección
+        safe_name = _html_escape(contact_form.from_name)
+        safe_email = _html_escape(str(contact_form.from_email))
+        safe_service = _html_escape(contact_form.service)
+        safe_message = _html_escape(contact_form.message).replace("\n", "<br>")
+
         html_body = f"""
         <html>
             <body>
@@ -233,19 +249,19 @@ async def send_email(contact_form: ContactForm):
                 <table style="border-collapse: collapse; width: 100%; max-width: 600px;">
                     <tr>
                         <td style="padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Nombre:</strong></td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">{contact_form.from_name}</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">{safe_name}</td>
                     </tr>
                     <tr>
                         <td style="padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Email:</strong></td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">{contact_form.from_email}</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">{safe_email}</td>
                     </tr>
                     <tr>
                         <td style="padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Servicio de interés:</strong></td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">{contact_form.service}</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">{safe_service}</td>
                     </tr>
                     <tr>
                         <td style="padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;"><strong>Mensaje:</strong></td>
-                        <td style="padding: 10px; border: 1px solid #ddd;">{contact_form.message}</td>
+                        <td style="padding: 10px; border: 1px solid #ddd;">{safe_message}</td>
                     </tr>
                 </table>
                 <p><small>Este mensaje fue enviado desde el formulario de contacto del sitio web Micro-Servicios.</small></p>
@@ -253,19 +269,14 @@ async def send_email(contact_form: ContactForm):
         </html>
         """
 
-        text_body = f"""
-        Nuevo mensaje de contacto desde el sitio web:
-
-        Nombre: {contact_form.from_name}
-        Email: {contact_form.from_email}
-        Servicio de interés: {contact_form.service}
-
-        Mensaje:
-        {contact_form.message}
-
-        ---
-        Este mensaje fue enviado desde el formulario de contacto del sitio web Micro-Servicios.
-        """
+        text_body = (
+            f"Nuevo mensaje de contacto desde el sitio web:\n\n"
+            f"Nombre: {contact_form.from_name}\n"
+            f"Email: {contact_form.from_email}\n"
+            f"Servicio de interés: {contact_form.service}\n\n"
+            f"Mensaje:\n{contact_form.message}\n\n"
+            "---\nEste mensaje fue enviado desde el formulario de contacto de Micro-Servicios."
+        )
 
         result = email_client.send_html_email(
             to_email=recipient_email,
@@ -278,11 +289,8 @@ async def send_email(contact_form: ContactForm):
         return {"message": "Email enviado exitosamente", "status": "success"}
 
     except Exception as e:
-        logger.error(f"Error sending email: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error al enviar email: {str(e)}"
-        )
+        logger.error(f"Error sending email: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Error al enviar el correo. Intenta más tarde.")
 
 
 if __name__ == "__main__":

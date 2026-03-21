@@ -1,54 +1,88 @@
-.App {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
 .app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
-.app-header {
+/* ── Navbar overrides / additions to ms-nav base ───────── */
+.ms-nav__brand {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  gap: 0.5rem;
+  flex: 1;
 }
 
-.logo {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--primary-color);
-}
-
-.main-nav {
+.ms-nav__logo-link {
   display: flex;
-  gap: 1.5rem;
-}
-
-.nav-link {
+  align-items: center;
+  gap: 0.35rem;
   text-decoration: none;
-  color: var(--text-color);
+  color: var(--ms-text-inv, #fff);
+}
+
+.ms-nav__logo-icon {
+  font-size: 1.1rem;
+}
+
+.ms-nav__logo-text {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: rgba(255,255,255,0.75);
+}
+
+.ms-nav__logo-text strong {
+  font-weight: 700;
+  color: #fff;
+}
+
+.ms-nav__separator {
+  color: rgba(255,255,255,0.3);
+  font-size: 1rem;
+  user-select: none;
+}
+
+.ms-nav__app-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.ms-nav__links {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0;
+}
+
+.ms-nav__link {
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--ms-radius-md, 8px);
+  text-decoration: none;
+  font-size: 0.9rem;
   font-weight: 500;
-  transition: color 0.3s ease;
+  color: rgba(255,255,255,0.75);
+  transition: background var(--ms-transition-fast, 0.15s ease), color var(--ms-transition-fast, 0.15s ease);
 }
 
-.nav-link:hover {
-  color: var(--primary-color);
+.ms-nav__link:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
 }
 
+.ms-nav__link--active {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+}
+
+/* ── Layout ─────────────────────────────────────────────── */
 .main-content {
   flex: 1;
 }
 
 .app-footer {
-  padding: 1.5rem;
-  background-color: var(--light-gray);
+  padding: 1.25rem 2rem;
+  background: var(--ms-bg-dark, #0f172a);
   text-align: center;
-  font-size: 0.9rem;
-  color: #666;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.4);
+  border-top: 1px solid rgba(255,255,255,0.06);
 }
