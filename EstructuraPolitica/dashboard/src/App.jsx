@@ -7,6 +7,7 @@ import DashboardHome from './pages/DashboardHome'
 import CommitteesStats from './pages/CommitteesStats'
 import AttendanceStats from './pages/AttendanceStats'
 import MapPage from './pages/MapPage'
+import SeccionesMapPage from './pages/SeccionesMapPage'
 import LoginPage from './pages/LoginPage'
 
 function Sidebar({ open, onClose }) {
@@ -31,7 +32,11 @@ function Sidebar({ open, onClose }) {
         </NavLink>
         <NavLink to="/map" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={onClose}>
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-          Mapa
+          Asistencia GPS
+        </NavLink>
+        <NavLink to="/secciones" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`} onClick={onClose}>
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/></svg>
+          Secciones
         </NavLink>
       </nav>
       <div style={{ padding: '16px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
@@ -65,6 +70,7 @@ function ProtectedLayout() {
           <Route path="committees" element={<CommitteesStats />} />
           <Route path="attendance" element={<AttendanceStats />} />
           <Route path="map" element={<MapPage />} />
+          <Route path="secciones" element={<SeccionesMapPage />} />
         </Routes>
       </div>
       {sidebarOpen && <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 99 }} onClick={() => setSidebarOpen(false)} />}

@@ -2,7 +2,8 @@
 Modelos de base de datos con SQLModel
 Todos los modelos incluyen tenant_id para aislamiento multi-tenant
 """
-from sqlmodel import SQLModel, Field, Relationship
+from sqlmodel import SQLModel, Field, Relationship, Column
+from sqlalchemy import Text
 from typing import Optional, List
 from datetime import datetime
 from enum import Enum
@@ -571,15 +572,28 @@ class AuditLog(SQLModel, table=True):
 # ====================================
 
 class Seccion(SQLModel, table=True):
-    """Catálogo de secciones electorales (opcional)"""
+    """Catálogo de secciones electorales con polígonos geográficos (opcional)"""
     __tablename__ = "secciones"
-    
+
     id: Optional[int] = Field(default=None, primary_key=True)
     tenant_id: int = Field(foreign_key="tenants.id", index=True)
-    
+
+    # Geografía: estado de la república
+    estado_id: Optional[int] = Field(default=None, index=True)
+    nombre_estado: Optional[str] = Field(default=None, max_length=200)
+
     municipio_id: Optional[int] = None
     nombre_municipio: Optional[str] = Field(default=None, max_length=200)
     distrito_id: Optional[int] = None
     nombre_distrito: Optional[str] = Field(default=None, max_length=200)
     distrito_federal: Optional[int] = None
     seccion_numero: str = Field(max_length=50, index=True)
+
+    # Polígono GeoJSON (geometría de la sección)
+    geojson: Optional[str] = Field(default=None, sa_column=Column(Text))
+
+    # Bounding box para zoom rápido en el mapa
+    bbox_min_lat: Optional[float] = None
+    bbox_max_lat: Optional[float] = None
+    bbox_min_lon: Optional[float] = None
+    bbox_max_lon: Optional[float] = None
