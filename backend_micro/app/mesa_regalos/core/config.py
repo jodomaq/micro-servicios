@@ -31,7 +31,7 @@ class Settings(BaseSettings):
             return "https://api-m.paypal.com"
         return "https://api-m.sandbox.paypal.com"
 
-    model_config = {"env_prefix": "MR_", "env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {"env_prefix": "MR_", "env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
 
 settings = Settings()

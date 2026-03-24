@@ -81,6 +81,7 @@ class Settings(BaseSettings):
         env_prefix = "EP_"
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"
 
 
 @lru_cache()

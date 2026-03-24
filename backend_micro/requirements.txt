@@ -49,7 +49,7 @@ fpdf2                     # Estructura Política (certificados)
 # ====================================
 # HTTP Y SCRAPING
 # ====================================
-httpx>=0.27.0
+httpx>=0.28.1
 requests>=2.32.0
 beautifulsoup4>=4.12.0    # Mesa de Regalos (scraper Mercado Libre)
 
