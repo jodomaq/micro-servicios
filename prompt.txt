@@ -8,7 +8,7 @@ Agrega imágenes relacionadas desde catálogos de imagenes gratuitas en la web
 Escribe la página en español.
 Estos son los micro-servicios:
 1. IQTest
-2. Convertir estados de cuenta a Excel
+2. Convertir tablas a Excel
 3. Historia clínica con IA
 4. Reparación de fotografías antiguas con IA
 5. Quinielas entra amigos
