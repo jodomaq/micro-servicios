@@ -476,24 +476,53 @@ class SurveyResponseSchema(BaseModel):
 
 class SeccionCreate(BaseModel):
     """Crear sección electoral"""
+    estado_id: Optional[int] = None
+    nombre_estado: Optional[str] = None
     municipio_id: Optional[int] = None
     nombre_municipio: Optional[str] = None
     distrito_id: Optional[int] = None
     nombre_distrito: Optional[str] = None
     distrito_federal: Optional[int] = None
     seccion_numero: str
+    geojson: Optional[str] = None
+    bbox_min_lat: Optional[float] = None
+    bbox_max_lat: Optional[float] = None
+    bbox_min_lon: Optional[float] = None
+    bbox_max_lon: Optional[float] = None
 
 
 class SeccionResponse(BaseModel):
     """Respuesta con sección electoral"""
     id: int
     tenant_id: int
+    estado_id: Optional[int] = None
+    nombre_estado: Optional[str] = None
     municipio_id: Optional[int] = None
     nombre_municipio: Optional[str] = None
     distrito_id: Optional[int] = None
     nombre_distrito: Optional[str] = None
     distrito_federal: Optional[int] = None
     seccion_numero: str
+    geojson: Optional[str] = None
+    bbox_min_lat: Optional[float] = None
+    bbox_max_lat: Optional[float] = None
+    bbox_min_lon: Optional[float] = None
+    bbox_max_lon: Optional[float] = None
+
+
+class SeccionPoligonoResponse(BaseModel):
+    """Respuesta compacta para el navegador de mapa — incluye bbox como objeto"""
+    id: int
+    seccion: int  # seccion_numero como int para ordenamiento
+    nombre_estado: Optional[str] = None
+    estado_id: Optional[int] = None
+    nombre_municipio: Optional[str] = None
+    municipio_id: Optional[int] = None
+    nombre_distrito: Optional[str] = None
+    distrito_id: Optional[int] = None
+    distrito_federal: Optional[int] = None
+    geojson: Optional[str] = None
+    bbox: Optional[dict] = None  # {min_lat, max_lat, min_lon, max_lon}
 
 
 # ====================================
